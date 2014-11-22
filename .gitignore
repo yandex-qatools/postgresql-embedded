@@ -1,0 +1,12 @@
+target
+temp/
+velocity.log
+*~
+.classpath
+.project
+.settings
+.externalToolBuilders
+.idea
+*.iml
+*.ipr
+*.iws
