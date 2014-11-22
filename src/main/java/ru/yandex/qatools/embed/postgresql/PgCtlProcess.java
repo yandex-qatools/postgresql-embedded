@@ -3,7 +3,7 @@ package ru.yandex.qatools.embed.postgresql;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.extract.IExtractedFileSet;
-import ru.yandex.qatools.embed.postgresql.config.AbstractPostgresConfig;
+import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,15 +15,14 @@ import static java.util.Arrays.asList;
  * pg_ctl process
  * (helper to initialize the DB)
  */
-class PgCtlProcess<C extends AbstractPostgresConfig, E extends PgCtlExecutable<C>>
-        extends AbstractPGProcess<C, E, PgCtlProcess> {
+class PgCtlProcess<E extends PgCtlExecutable> extends AbstractPGProcess<E, PgCtlProcess> {
 
-    public PgCtlProcess(Distribution distribution, C config, IRuntimeConfig runtimeConfig, E executable) throws IOException {
+    public PgCtlProcess(Distribution distribution, PostgresConfig config, IRuntimeConfig runtimeConfig, E executable) throws IOException {
         super(distribution, config, runtimeConfig, executable);
     }
 
     @Override
-    protected List<String> getCommandLine(Distribution distribution, AbstractPostgresConfig config, IExtractedFileSet exe)
+    protected List<String> getCommandLine(Distribution distribution, PostgresConfig config, IExtractedFileSet exe)
             throws IOException {
         List<String> ret = new ArrayList<>();
         ret.add(exe.executable().getAbsolutePath());

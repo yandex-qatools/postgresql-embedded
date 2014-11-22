@@ -8,8 +8,6 @@ import ru.yandex.qatools.embed.postgresql.Command;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -148,10 +146,6 @@ public abstract class AbstractPostgresConfig<C extends AbstractPostgresConfig> e
 
         public String host() {
             return host;
-        }
-
-        public InetAddress getServerAddress() throws UnknownHostException {
-            return getLocalHost();
         }
     }
 

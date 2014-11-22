@@ -7,16 +7,17 @@ import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import static java.util.Arrays.asList;
+
 /**
- * createdb process
+ * createuser process
  * (helper to initialize the DB)
  */
-class CreateDbProcess<E extends CreateDbExecutable> extends AbstractPGProcess<E, CreateDbProcess> {
+public class CreateuserProcess<E extends CreateuserExecutable> extends AbstractPGProcess<E, CreateuserProcess> {
 
-    public CreateDbProcess(Distribution distribution, PostgresConfig config, IRuntimeConfig runtimeConfig, E executable) throws IOException {
+    public CreateuserProcess(Distribution distribution, PostgresConfig config, IRuntimeConfig runtimeConfig, E executable) throws IOException {
         super(distribution, config, runtimeConfig, executable);
     }
 
@@ -25,12 +26,11 @@ class CreateDbProcess<E extends CreateDbExecutable> extends AbstractPGProcess<E,
             throws IOException {
         List<String> ret = new ArrayList<>();
         ret.add(exe.executable().getAbsolutePath());
-        ret.addAll(Arrays.asList(
+        ret.addAll(asList(
                 "-h", config.net().host(),
                 "-p", String.valueOf(config.net().port())
         ));
-        ret.add(config.storage().dbName());
-
+        ret.addAll(config.args());
         return ret;
     }
 }

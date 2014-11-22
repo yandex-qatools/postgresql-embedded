@@ -27,32 +27,45 @@ import de.flapdoodle.embed.process.extract.IExtractedFileSet;
 import de.flapdoodle.embed.process.io.LogWatchStreamProcessor;
 import de.flapdoodle.embed.process.io.Processors;
 import de.flapdoodle.embed.process.io.StreamToLineProcessor;
+import de.flapdoodle.embed.process.io.directories.PropertyOrPlatformTempDir;
+import de.flapdoodle.embed.process.io.file.Files;
 import de.flapdoodle.embed.process.runtime.ProcessControl;
-import ru.yandex.qatools.embed.postgresql.config.AbstractPostgresConfig;
+import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import static de.flapdoodle.embed.process.io.file.Files.createTempFile;
 import static java.util.Arrays.asList;
+import static java.util.UUID.randomUUID;
 
 /**
  * initdb process
  * (helper to initialize the DB)
  */
-class InitDbProcess<C extends AbstractPostgresConfig, E extends InitDbExecutable<C>>
-        extends AbstractPGProcess<C, E, InitDbProcess> {
+class InitDbProcess<E extends InitDbExecutable> extends AbstractPGProcess<E, InitDbProcess> {
 
-    public InitDbProcess(Distribution distribution, C config, IRuntimeConfig runtimeConfig, E executable) throws IOException {
+    public InitDbProcess(Distribution distribution, PostgresConfig config, IRuntimeConfig runtimeConfig, E executable) throws IOException {
         super(distribution, config, runtimeConfig, executable);
     }
 
     @Override
-    protected List<String> getCommandLine(Distribution distribution, AbstractPostgresConfig config, IExtractedFileSet exe)
+    protected List<String> getCommandLine(Distribution distribution, PostgresConfig config, IExtractedFileSet exe)
             throws IOException {
         List<String> ret = new ArrayList<>();
         ret.add(exe.executable().getAbsolutePath());
+        if (getConfig().credentials() != null) {
+            final File pwFile = createTempFile(PropertyOrPlatformTempDir.defaultInstance(), "pwfile" + randomUUID());
+            Files.write(getConfig().credentials().password(), pwFile);
+            ret.addAll(asList(
+                    "-A", "password",
+                    "-U", getConfig().credentials().username(),
+                    "--pwfile=" + pwFile.getAbsolutePath()
+            ));
+        }
         ret.add(config.storage().dbDir().getAbsolutePath());
         return ret;
     }

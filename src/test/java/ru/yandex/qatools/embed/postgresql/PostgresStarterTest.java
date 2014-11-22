@@ -3,7 +3,7 @@ package ru.yandex.qatools.embed.postgresql;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import ru.yandex.qatools.embed.postgresql.config.PostgresqlConfig;
+import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -15,22 +15,23 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
-public class PostgresqlStarterTest {
+public class PostgresStarterTest {
 
-    private String url;
     private PostgresProcess process;
     private Connection conn;
 
     @Before
     public void setUp() throws Exception {
-        PostgresStarter runtime = PostgresStarter.getDefaultInstance();
-        final PostgresqlConfig configDb = PostgresqlConfig.defaultWithDbName("test");
-        PostgresExecutable exec = runtime.prepare(configDb);
+        PostgresStarter<PostgresExecutable, PostgresProcess> runtime = PostgresStarter.getDefaultInstance();
+        final PostgresConfig config = PostgresConfig.defaultWithDbName("test", "user", "password");
+        PostgresExecutable exec = runtime.prepare(config);
         process = exec.start();
-        url = format("jdbc:postgresql://%s:%s/%s",
-                configDb.net().getServerAddress().getHostAddress(),
-                configDb.net().port(),
-                configDb.storage().dbName()
+        String url = format("jdbc:postgresql://%s:%s/%s?user=%s&password=%s",
+                config.net().host(),
+                config.net().port(),
+                config.storage().dbName(),
+                config.credentials().username(),
+                config.credentials().password()
         );
         conn = DriverManager.getConnection(url);
     }

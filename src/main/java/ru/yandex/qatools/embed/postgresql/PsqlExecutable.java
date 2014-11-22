@@ -8,20 +8,20 @@ import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
 import java.io.IOException;
 
 /**
- * pg_ctl executor
+ * psql executor
  * (helper to initialize the DB)
  */
-class PgCtlExecutable extends AbstractPGExecutable<PostgresConfig, PgCtlProcess> {
+public class PsqlExecutable extends AbstractPGExecutable<PostgresConfig, PsqlProcess> {
 
-    public PgCtlExecutable(Distribution distribution,
-                           PostgresConfig config, IRuntimeConfig runtimeConfig, IExtractedFileSet exe) {
-        super(distribution, config, runtimeConfig, exe);
+    public PsqlExecutable(Distribution distribution,
+                          PostgresConfig config, IRuntimeConfig runtimeConfig, IExtractedFileSet redisdExecutable) {
+        super(distribution, config, runtimeConfig, redisdExecutable);
     }
 
     @Override
-    protected PgCtlProcess start(Distribution distribution, PostgresConfig config, IRuntimeConfig runtime)
+    protected PsqlProcess start(Distribution distribution, PostgresConfig config, IRuntimeConfig runtime)
             throws IOException {
-        return new PgCtlProcess<>(distribution, config, runtime, this);
+        return new PsqlProcess<>(distribution, config, runtime, this);
     }
 
     @Override
