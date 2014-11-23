@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.sonatype.oss</groupId>
         <artifactId>oss-parent</artifactId>
-        <version>7</version>
+        <version>9</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -16,6 +16,10 @@
 
     <description>An embedded PostgreSQL...</description>
 
+    <organization>
+        <name>Yandex</name>
+        <url>http://company.yandex.com</url>
+    </organization>
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
@@ -23,7 +27,10 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
-
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/yandex-qatools/postgresql-embedded/issues</url>
+    </issueManagement>
 
     <scm>
         <connection>scm:git:git@github.com:yandex-qatools/postgresql-embedded.git</connection>
