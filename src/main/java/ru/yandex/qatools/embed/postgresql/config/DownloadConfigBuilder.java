@@ -16,7 +16,7 @@ public class DownloadConfigBuilder extends de.flapdoodle.embed.process.config.st
     public DownloadConfigBuilder defaultsForCommand(Command command) {
 		fileNaming().setDefault(new UUIDTempNaming());
         // I've found the only open and easy to use cross platform binaries
-		downloadPath().setDefault(new DownloadPath("http://repo1.maven.org/maven2/com/github/adrianboimvaser/postgresql-dist/"));
+		downloadPath().setDefault(new DownloadPath("http://get.enterprisedb.com/postgresql/"));
 		progressListener().setDefault(new StandardConsoleProgressListener());
 		packageResolver().setDefault(new PackagePaths(command));
 		artifactStorePath().setDefault(new UserHome(".embedpostgresql"));

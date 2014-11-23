@@ -22,9 +22,7 @@ public class TestDownloads extends TestCase {
             for (BitSize b : BitSize.values()) {
                 for (IVersion version : Version.Main.values()) {
                     Distribution distribution = new Distribution(version, p, b);
-                    if (p != Platform.OS_X || b != BitSize.B64) {
-                        assertTrue("Distribution: " + distribution, artifactStore.checkDistribution(distribution));
-                    }
+                    assertTrue("Distribution: " + distribution, artifactStore.checkDistribution(distribution));
                 }
             }
         }

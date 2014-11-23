@@ -10,23 +10,34 @@ Much of the code has been crafted from [Flapdoodle OSS's embed process](https://
 - its easy, much easier as installing right version by hand
 - you can change version per test
 
+
+### Maven
+
+Add the following dependency to your pom.xml:
+```xml
+    <dependency>
+        <groupId>ru.yandex.qatools.embed</groupId>
+        <artifactId>postgresql-embedded</artifactId>
+        <version>1.0</version>
+    </dependency>
+```
 ## Howto
 
-TODO
 
+Here is the example of how to launch and use the embedded PostgreSQL instance
 ```java
 
     // starting Postgres
-    PostgresStarter runtime = PostgresStarter.getDefaultInstance();
-    final PostgresqlConfig configDb = PostgresqlConfig.defaultWithDbName("test");
-    PostgresExecutable exec = runtime.prepare(configDb);
+    PostgresStarter<PostgresExecutable, PostgresProcess> runtime = PostgresStarter.getDefaultInstance();
+    final PostgresConfig config = PostgresConfig.defaultWithDbName("test");
+    PostgresExecutable exec = runtime.prepare(config);
     PostgresProcess process = exec.start();
     
     // connecting to a running Postgres
     String url = format("jdbc:postgresql://%s:%s/%s?user=%s&password=%s",
-            configDb.net().getServerAddress().getHostAddress(),
-            configDb.net().port(),
-            configDb.storage().dbName()
+            config.net().getServerAddress().getHostAddress(),
+            config.net().port(),
+            config.storage().dbName()
     );
     Connection conn = DriverManager.getConnection(url);
     
@@ -44,12 +55,8 @@ TODO
     process.stop();
 ```
 
-### Maven
-
-TODO
-
 ### Supported Versions
 
-Versions: 9.2.4, any custom
+Versions: 9.3.5, 9.2.4, any custom
 Support for Linux, Windows and MacOSX.
 

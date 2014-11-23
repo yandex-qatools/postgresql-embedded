@@ -124,6 +124,7 @@ public class PackagePaths implements IPackageResolver {
                         bitsize = "-x64";
                         break;
                     case OS_X:
+                        break;
                     default:
                         throw new IllegalArgumentException(
                                 "64 bit supported only on Linux and Windows, platform is "
@@ -134,8 +135,7 @@ public class PackagePaths implements IPackageResolver {
                 throw new IllegalArgumentException("Unknown BitSize " + distribution.getBitsize());
         }
 
-        return "/" + sversion + "/postgresql-dist-" + sversion + "-" + splatform + bitsize
-                + "." + sarchiveType;
+        return "postgresql-" + sversion + "-" + splatform + bitsize + "-binaries" + "." + sarchiveType;
     }
 
     protected static String getVersionPart(IVersion version) {
