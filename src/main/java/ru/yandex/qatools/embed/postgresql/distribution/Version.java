@@ -8,12 +8,12 @@ import de.flapdoodle.embed.process.distribution.IVersion;
 public enum Version implements IVersion {
 
     /**
-     * 9.3.5 release
+     * 9.3.6 release
      */
-    V9_3_5("9.3.5-1"),
+    V9_4_1("9.4.1-1"),
+    V9_3_6("9.3.6-1"),
     @Deprecated
-    V9_2_4("9.2.4-1"),
-    ;
+    V9_2_4("9.2.4-1"),;
 
     private final String specificVersion;
 
@@ -37,9 +37,11 @@ public enum Version implements IVersion {
         /**
          * latest production release
          */
-        V9_3(V9_3_5),
+        @Deprecated
+        V9_3(V9_3_6),
+        V9_4(V9_4_1),
 
-        PRODUCTION(V9_3_5);
+        PRODUCTION(V9_4_1);
 
         private final IVersion _latest;
 

@@ -50,5 +50,6 @@ public class PostgresStarterTest {
         final Statement statement = conn.createStatement();
         assertThat(statement.execute("SELECT * FROM films;"), is(true));
         assertThat(statement.getResultSet().next(), is(true));
+        assertThat(statement.getResultSet().getString("code"), is("movie"));
     }
 }
