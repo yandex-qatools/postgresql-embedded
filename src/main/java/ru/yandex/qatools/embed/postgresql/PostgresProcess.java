@@ -8,11 +8,12 @@ import de.flapdoodle.embed.process.io.LogWatchStreamProcessor;
 import de.flapdoodle.embed.process.io.LoggingOutputStreamProcessor;
 import de.flapdoodle.embed.process.io.Processors;
 import de.flapdoodle.embed.process.io.StreamToLineProcessor;
-import de.flapdoodle.embed.process.io.file.Files;
+import de.flapdoodle.embed.process.io.directories.IDirectory;
 import de.flapdoodle.embed.process.runtime.Executable;
 import de.flapdoodle.embed.process.runtime.ProcessControl;
 import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
 import ru.yandex.qatools.embed.postgresql.config.RuntimeConfigBuilder;
+import ru.yandex.qatools.embed.postgresql.ext.PostgresArtifactStore;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -21,6 +22,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static de.flapdoodle.embed.process.io.file.Files.forceDelete;
 import static java.lang.String.format;
 import static org.apache.commons.io.FileUtils.readLines;
 import static ru.yandex.qatools.embed.postgresql.Command.CreateDb;
@@ -33,12 +35,14 @@ import static ru.yandex.qatools.embed.postgresql.config.AbstractPostgresConfig.S
  */
 public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, PostgresProcess> {
     private static Logger logger = Logger.getLogger(PostgresProcess.class.getName());
+    private final IRuntimeConfig runtimeConfig;
 
     boolean stopped = false;
 
     public PostgresProcess(Distribution distribution, PostgresConfig config,
                            IRuntimeConfig runtimeConfig, PostgresExecutable executable) throws IOException {
         super(distribution, config, runtimeConfig, executable);
+        this.runtimeConfig = runtimeConfig;
     }
 
     protected Set<String> knownFailureMessages() {
@@ -72,7 +76,14 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
     }
 
     protected final boolean sendStopToPostgresqlInstance() {
-        return shutdownPostgres(getConfig());
+        final boolean result = shutdownPostgres(getConfig());
+        if (runtimeConfig.getArtifactStore() instanceof PostgresArtifactStore) {
+            final IDirectory tempDir = ((PostgresArtifactStore) runtimeConfig.getArtifactStore()).getTempDir();
+            logger.log(Level.INFO, format("Cleaning up after the embedded process (removing %s)...",
+                    tempDir.asFile().getAbsolutePath()));
+            forceDelete(tempDir.asFile());
+        }
+        return result;
     }
 
     public static boolean shutdownPostgres(PostgresConfig config) {
@@ -122,7 +133,7 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
 
     protected void deleteTempFiles() {
         final Storage storage = getConfig().storage();
-        if ((storage.dbDir() != null) && (storage.isTmpDir()) && (!Files.forceDelete(storage.dbDir()))) {
+        if ((storage.dbDir() != null) && (storage.isTmpDir()) && (!forceDelete(storage.dbDir()))) {
             logger.warning("Could not delete temp db dir: " + storage.dbDir());
         }
     }

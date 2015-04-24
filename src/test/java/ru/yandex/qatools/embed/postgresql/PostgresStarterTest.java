@@ -3,6 +3,7 @@ package ru.yandex.qatools.embed.postgresql;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import ru.yandex.qatools.embed.postgresql.config.AbstractPostgresConfig;
 import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
 
 import java.sql.Connection;
@@ -14,6 +15,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static ru.yandex.qatools.embed.postgresql.distribution.Version.Main.PRODUCTION;
 
 public class PostgresStarterTest {
 
@@ -23,7 +25,9 @@ public class PostgresStarterTest {
     @Before
     public void setUp() throws Exception {
         PostgresStarter<PostgresExecutable, PostgresProcess> runtime = PostgresStarter.getDefaultInstance();
-        final PostgresConfig config = PostgresConfig.defaultWithDbName("test", "user", "password");
+        final PostgresConfig config = new PostgresConfig(PRODUCTION, new AbstractPostgresConfig.Net(),
+                new AbstractPostgresConfig.Storage("test"), new AbstractPostgresConfig.Timeout(),
+                new AbstractPostgresConfig.Credentials("user", "password"));
         PostgresExecutable exec = runtime.prepare(config);
         process = exec.start();
         String url = format("jdbc:postgresql://%s:%s/%s?user=%s&password=%s",
