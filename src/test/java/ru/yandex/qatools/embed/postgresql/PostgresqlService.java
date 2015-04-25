@@ -1,29 +1,23 @@
 package ru.yandex.qatools.embed.postgresql;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import ru.yandex.qatools.embed.postgresql.config.AbstractPostgresConfig;
 import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.Statement;
 
 import static java.lang.String.format;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
 import static ru.yandex.qatools.embed.postgresql.distribution.Version.Main.PRODUCTION;
 
-public class PostgresStarterTest {
+/**
+ * @author Ilya Sadykov
+ */
+public class PostgresqlService {
 
     private PostgresProcess process;
     private Connection conn;
 
-    @Before
-    public void setUp() throws Exception {
+    public void start() throws Exception {
         PostgresStarter<PostgresExecutable, PostgresProcess> runtime = PostgresStarter.getDefaultInstance();
         final PostgresConfig config = new PostgresConfig(PRODUCTION, new AbstractPostgresConfig.Net(),
                 new AbstractPostgresConfig.Storage("test"), new AbstractPostgresConfig.Timeout(),
@@ -40,20 +34,16 @@ public class PostgresStarterTest {
         conn = DriverManager.getConnection(url);
     }
 
-    @After
-    public void tearDown() throws Exception {
-        conn.close();
-        process.stop();
+    public PostgresProcess getProcess() {
+        return process;
     }
 
-    @Test
-    public void testPostgres() throws Exception {
-        assertThat(conn, not(nullValue()));
-        assertThat(conn.createStatement().execute("CREATE TABLE films (code char(5));"), is(false));
-        assertThat(conn.createStatement().execute("INSERT INTO films VALUES ('movie');"), is(false));
-        final Statement statement = conn.createStatement();
-        assertThat(statement.execute("SELECT * FROM films;"), is(true));
-        assertThat(statement.getResultSet().next(), is(true));
-        assertThat(statement.getResultSet().getString("code"), is("movie"));
+    public Connection getConn() {
+        return conn;
+    }
+
+    public void stop() throws Exception {
+        conn.close();
+        process.stop();
     }
 }

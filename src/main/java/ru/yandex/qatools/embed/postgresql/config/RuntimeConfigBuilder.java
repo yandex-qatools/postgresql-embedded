@@ -11,7 +11,7 @@ import ru.yandex.qatools.embed.postgresql.ext.ArtifactStoreBuilder;
 public class RuntimeConfigBuilder extends de.flapdoodle.embed.process.config.RuntimeConfigBuilder {
 
     public RuntimeConfigBuilder defaults(Command command) {
-        processOutput().setDefault(         ProcessOutput.getDefaultInstance(command.commandName()));
+        processOutput().setDefault(ProcessOutput.getDefaultInstance(command.commandName()));
         commandLinePostProcessor().setDefault(new ICommandLinePostProcessor.Noop());
         artifactStore().setDefault(new ArtifactStoreBuilder().defaultsWithoutCache(command).build());
         return this;

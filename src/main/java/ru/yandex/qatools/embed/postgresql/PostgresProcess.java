@@ -57,7 +57,7 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
         synchronized (this) {
             if (!stopped) {
                 stopped = true;
-                logger.info("try to stop postgresql");
+                logger.info("trying to stop postgresql");
                 if (!sendStopToPostgresqlInstance()) {
                     logger.warning("could not stop postgresql with command, try next");
                     if (!sendKillToProcess()) {
@@ -79,15 +79,22 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
         final boolean result = shutdownPostgres(getConfig());
         if (runtimeConfig.getArtifactStore() instanceof PostgresArtifactStore) {
             final IDirectory tempDir = ((PostgresArtifactStore) runtimeConfig.getArtifactStore()).getTempDir();
-            logger.log(Level.INFO, format("Cleaning up after the embedded process (removing %s)...",
-                    tempDir.asFile().getAbsolutePath()));
+            if (tempDir != null && tempDir.asFile() != null) {
+                logger.log(Level.INFO, format("Cleaning up after the embedded process (removing %s)...",
+                        tempDir.asFile().getAbsolutePath()));
+            }
             forceDelete(tempDir.asFile());
         }
         return result;
     }
 
     public static boolean shutdownPostgres(PostgresConfig config) {
-        return runCmd(config, Command.PgCtl, "server stopped", "stop");
+        try {
+            return runCmd(config, Command.PgCtl, "server stopped", "stop");
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Failed to stop postgres by pg_ctl!", e);
+        }
+        return false;
     }
 
     private static <P extends AbstractPGProcess> boolean runCmd(
