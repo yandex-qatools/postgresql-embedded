@@ -16,6 +16,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static ru.yandex.qatools.embed.postgresql.distribution.Version.Main.PRODUCTION;
+import static ru.yandex.qatools.embed.postgresql.util.SocketUtil.findFreePort;
 
 public class TestPostgresStarter {
 
@@ -25,8 +26,9 @@ public class TestPostgresStarter {
     @Before
     public void setUp() throws Exception {
         PostgresStarter<PostgresExecutable, PostgresProcess> runtime = PostgresStarter.getDefaultInstance();
-        final PostgresConfig config = new PostgresConfig(PRODUCTION, new AbstractPostgresConfig.Net(),
-                new AbstractPostgresConfig.Storage("test"), new AbstractPostgresConfig.Timeout(),
+        final PostgresConfig config = new PostgresConfig(PRODUCTION, new AbstractPostgresConfig.Net(
+                "localhost", findFreePort()
+        ), new AbstractPostgresConfig.Storage("test"), new AbstractPostgresConfig.Timeout(),
                 new AbstractPostgresConfig.Credentials("user", "password"));
         PostgresExecutable exec = runtime.prepare(config);
         process = exec.start();

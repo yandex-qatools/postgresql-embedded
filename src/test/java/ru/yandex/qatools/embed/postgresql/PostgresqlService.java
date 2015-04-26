@@ -8,6 +8,7 @@ import java.sql.DriverManager;
 
 import static java.lang.String.format;
 import static ru.yandex.qatools.embed.postgresql.distribution.Version.Main.PRODUCTION;
+import static ru.yandex.qatools.embed.postgresql.util.SocketUtil.findFreePort;
 
 /**
  * @author Ilya Sadykov
@@ -19,7 +20,7 @@ public class PostgresqlService {
 
     public void start() throws Exception {
         PostgresStarter<PostgresExecutable, PostgresProcess> runtime = PostgresStarter.getDefaultInstance();
-        final PostgresConfig config = new PostgresConfig(PRODUCTION, new AbstractPostgresConfig.Net(),
+        final PostgresConfig config = new PostgresConfig(PRODUCTION, new AbstractPostgresConfig.Net("localhost", findFreePort()),
                 new AbstractPostgresConfig.Storage("test"), new AbstractPostgresConfig.Timeout(),
                 new AbstractPostgresConfig.Credentials("user", "password"));
         PostgresExecutable exec = runtime.prepare(config);
