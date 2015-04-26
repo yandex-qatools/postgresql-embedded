@@ -19,7 +19,7 @@ Add the following dependency to your pom.xml:
     <dependency>
         <groupId>ru.yandex.qatools.embed</groupId>
         <artifactId>postgresql-embedded</artifactId>
-        <version>1.1</version>
+        <version>1.2</version>
     </dependency>
 ```
 ## Howto
