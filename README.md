@@ -1,16 +1,16 @@
 # Embedded PostgreSQL Server
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/ru.yandex.qatools.embed/postgresql-embedded/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/ru.yandex.qatools.embed/postgresql-embedded) [![covarage](https://img.shields.io/sonar/http/sonar.qatools.ru/ru.yandex.qatools.embed:postgresql-embedded/coverage.svg?style=flat)](http://sonar.qatools.ru/dashboard/index/784)
 
-Embedded postgresql will provide a platform neutral way for running postgres binary in unittests.
-Much of the code has been crafted from [Flapdoodle OSS's embed process](https://github.com/flapdoodle-oss/de.flapdoodle.embed.process)
+Embedded PostgreSQL server provides a platform neutral way for running postgres binaries in unittests.
+This library is based on [Flapdoodle OSS's embed process](https://github.com/flapdoodle-oss/de.flapdoodle.embed.process). 
 
-**Notice** This is still not well-tested and hacky library.
+Please consider using the [embedded-services](https://github.com/yandex-qatools/embedded-services) project as well.
 
-## Why?
+## Motivation
 
-- its easy, much easier as installing right version by hand
-- you can change version per test
-
+* It's much easier than installing specific version manually
+* You can choose the version right from the code
+* You can start your development environment with the PostgreSQL embedded with the single command
 
 ### Maven
 
@@ -23,7 +23,6 @@ Add the following dependency to your pom.xml:
     </dependency>
 ```
 ## Howto
-
 
 Here is the example of how to launch and use the embedded PostgreSQL instance
 ```java
