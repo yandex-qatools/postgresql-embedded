@@ -154,7 +154,7 @@ public abstract class AbstractPostgresConfig<C extends AbstractPostgresConfig> e
         private final long startupTimeout;
 
         public Timeout() {
-            this(2000);
+            this(15000);
         }
 
         public Timeout(long startupTimeout) {
