@@ -19,7 +19,7 @@ Add the following dependency to your pom.xml:
     <dependency>
         <groupId>ru.yandex.qatools.embed</groupId>
         <artifactId>postgresql-embedded</artifactId>
-        <version>1.3</version>
+        <version>1.4</version>
     </dependency>
 ```
 ## Howto
@@ -57,6 +57,6 @@ Here is the example of how to launch and use the embedded PostgreSQL instance
 
 ### Supported Versions
 
-Versions: 9.4.1, 9.3.5, 9.2.4, any custom
+Versions: 9.4.4, 9.4.1, 9.3.5, 9.2.4, any custom
 Support for Linux, Windows and MacOSX.
 
