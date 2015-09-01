@@ -27,10 +27,10 @@ import de.flapdoodle.embed.process.extract.IExtractedFileSet;
 import de.flapdoodle.embed.process.io.LogWatchStreamProcessor;
 import de.flapdoodle.embed.process.io.Processors;
 import de.flapdoodle.embed.process.io.StreamToLineProcessor;
-import de.flapdoodle.embed.process.io.directories.PropertyOrPlatformTempDir;
 import de.flapdoodle.embed.process.io.file.Files;
 import de.flapdoodle.embed.process.runtime.ProcessControl;
 import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
+import ru.yandex.qatools.embed.postgresql.ext.SubdirTempDir;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,7 +58,7 @@ class InitDbProcess<E extends InitDbExecutable> extends AbstractPGProcess<E, Ini
         List<String> ret = new ArrayList<>();
         ret.add(exe.executable().getAbsolutePath());
         if (getConfig().credentials() != null) {
-            final File pwFile = createTempFile(PropertyOrPlatformTempDir.defaultInstance(), "pwfile" + randomUUID());
+            final File pwFile = createTempFile(SubdirTempDir.defaultInstance(), "pwfile" + randomUUID());
             Files.write(getConfig().credentials().password(), pwFile);
             ret.addAll(asList(
                     "-A", "password",

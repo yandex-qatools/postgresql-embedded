@@ -6,13 +6,10 @@ import de.flapdoodle.embed.process.config.store.IPackageResolver;
 import de.flapdoodle.embed.process.distribution.ArchiveType;
 import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.distribution.IVersion;
-import de.flapdoodle.embed.process.io.directories.PropertyOrPlatformTempDir;
+import ru.yandex.qatools.embed.postgresql.ext.SubdirTempDir;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.logging.Logger;
-
-import static de.flapdoodle.embed.process.io.file.Files.createTempDir;
 
 /**
  * Paths builder
@@ -42,11 +39,11 @@ public class PackagePaths implements IPackageResolver {
                         + distribution.getPlatform());
         }
         try {
-            File tmpDir = createTempDir(PropertyOrPlatformTempDir.defaultInstance(), "embedpostgres");
+            File tmpDir = SubdirTempDir.defaultInstance().asFile();
             return FileSet.builder()
                     .addEntry(FileType.Executable, tmpDir.getPath(), "pgsql/bin/" + cmdPattern)
                     .build();
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

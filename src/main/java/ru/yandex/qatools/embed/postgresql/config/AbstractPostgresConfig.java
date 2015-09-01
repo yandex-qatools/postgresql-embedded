@@ -2,9 +2,9 @@ package ru.yandex.qatools.embed.postgresql.config;
 
 import de.flapdoodle.embed.process.config.ExecutableProcessConfig;
 import de.flapdoodle.embed.process.distribution.IVersion;
-import de.flapdoodle.embed.process.io.directories.PropertyOrPlatformTempDir;
 import de.flapdoodle.embed.process.io.file.Files;
 import ru.yandex.qatools.embed.postgresql.Command;
+import ru.yandex.qatools.embed.postgresql.ext.SubdirTempDir;
 
 import java.io.File;
 import java.io.IOException;
@@ -86,7 +86,7 @@ public abstract class AbstractPostgresConfig<C extends AbstractPostgresConfig> e
             this.dbName = dbName;
             if (isEmpty(databaseDir)) {
                 isTmpDir = true;
-                dbDir = Files.createTempDir(PropertyOrPlatformTempDir.defaultInstance(), "embedpostgres-db");
+                dbDir = Files.createTempDir(SubdirTempDir.defaultInstance(), "db-content");
             } else {
                 dbDir = Files.createOrCheckDir(databaseDir);
                 isTmpDir = false;
