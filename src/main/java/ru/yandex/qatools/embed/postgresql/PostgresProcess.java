@@ -4,17 +4,16 @@ import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.config.io.ProcessOutput;
 import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.extract.IExtractedFileSet;
-import de.flapdoodle.embed.process.io.LogWatchStreamProcessor;
 import de.flapdoodle.embed.process.io.LoggingOutputStreamProcessor;
-import de.flapdoodle.embed.process.io.Processors;
-import de.flapdoodle.embed.process.io.StreamToLineProcessor;
 import de.flapdoodle.embed.process.io.directories.IDirectory;
 import de.flapdoodle.embed.process.runtime.Executable;
 import de.flapdoodle.embed.process.runtime.ProcessControl;
 import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
 import ru.yandex.qatools.embed.postgresql.config.RuntimeConfigBuilder;
+import ru.yandex.qatools.embed.postgresql.ext.LogWatchStreamProcessor;
 import ru.yandex.qatools.embed.postgresql.ext.PostgresArtifactStore;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,6 +23,9 @@ import java.util.logging.Logger;
 
 import static de.flapdoodle.embed.process.io.file.Files.forceDelete;
 import static java.lang.String.format;
+import static java.lang.Thread.sleep;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.apache.commons.io.FileUtils.readLines;
 import static ru.yandex.qatools.embed.postgresql.Command.CreateDb;
 import static ru.yandex.qatools.embed.postgresql.Command.InitDb;
@@ -43,6 +45,41 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
                            IRuntimeConfig runtimeConfig, PostgresExecutable executable) throws IOException {
         super(distribution, config, runtimeConfig, executable);
         this.runtimeConfig = runtimeConfig;
+    }
+
+    public static boolean shutdownPostgres(PostgresConfig config) {
+        try {
+            return runCmd(config, Command.PgCtl, "server stopped", 1000, "stop");
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Failed to stop postgres by pg_ctl!");
+        }
+        return false;
+    }
+
+    private static <P extends AbstractPGProcess> boolean runCmd(
+            PostgresConfig config, Command cmd, String successOutput, int timoeut, String... args) {
+        return runCmd(config, cmd, successOutput, Collections.<String>emptySet(), timoeut, args);
+    }
+
+    private static <P extends AbstractPGProcess> boolean runCmd(
+            PostgresConfig config, Command cmd, String successOutput, Set<String> failOutput, long timeout, String... args) {
+        try {
+            LogWatchStreamProcessor logWatch = new LogWatchStreamProcessor(successOutput,
+                    failOutput, new LoggingOutputStreamProcessor(logger, Level.ALL));
+            final RuntimeConfigBuilder rtConfigBuilder = new RuntimeConfigBuilder().defaults(cmd);
+            IRuntimeConfig runtimeConfig = rtConfigBuilder
+                    .processOutput(new ProcessOutput(logWatch, logWatch, logWatch))
+                    .build();
+            Executable exec = getCommand(cmd, runtimeConfig)
+                    .prepare(new PostgresConfig(config).withArgs(args));
+            P proc = (P) exec.start();
+            logWatch.waitForResult(timeout);
+            proc.waitFor();
+            return true;
+        } catch (IOException | InterruptedException e) {
+            logger.log(Level.WARNING, e.getMessage());
+        }
+        return false;
     }
 
     protected Set<String> knownFailureMessages() {
@@ -88,48 +125,19 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
         return result;
     }
 
-    public static boolean shutdownPostgres(PostgresConfig config) {
-        try {
-            return runCmd(config, Command.PgCtl, "server stopped", "stop");
-        } catch (Exception e) {
-            logger.log(Level.WARNING, "Failed to stop postgres by pg_ctl!", e);
-        }
-        return false;
-    }
-
-    private static <P extends AbstractPGProcess> boolean runCmd(
-            PostgresConfig config, Command cmd, String waitOutput, String... args) {
-        try {
-            LogWatchStreamProcessor logWatch = new LogWatchStreamProcessor(waitOutput,
-                    Collections.<String>emptySet(), new LoggingOutputStreamProcessor(logger, Level.ALL));
-            final RuntimeConfigBuilder rtConfigBuilder = new RuntimeConfigBuilder().defaults(cmd);
-            IRuntimeConfig runtimeConfig = rtConfigBuilder
-                    .processOutput(new ProcessOutput(logWatch, logWatch, logWatch))
-                    .build();
-            Executable exec = getCommand(cmd, runtimeConfig)
-                    .prepare(new PostgresConfig(config).withArgs(args));
-            exec.start();
-            logWatch.waitForResult(config.timeout().startupTimeout());
-            return true;
-        } catch (IOException e) {
-            logger.log(Level.WARNING, e.getMessage());
-        }
-        return false;
-    }
-
     @Override
     protected void onBeforeProcess(IRuntimeConfig runtimeConfig)
             throws IOException {
         super.onBeforeProcess(runtimeConfig);
         PostgresConfig config = getConfig();
-        runCmd(config, InitDb, "Success. You can now start the database server using");
+        runCmd(config, InitDb, "Success. You can now start the database server using", 1000);
     }
 
     @Override
     protected List<String> getCommandLine(Distribution distribution, PostgresConfig config, IExtractedFileSet exe)
             throws IOException {
         List<String> ret = new ArrayList<>();
-        ret.addAll(Arrays.asList(exe.executable().getAbsolutePath(),
+        ret.addAll(asList(exe.executable().getAbsolutePath(),
                 "-h", config.net().host(),
                 "-p", String.valueOf(config.net().port()),
                 "-D", config.storage().dbDir().getAbsolutePath()
@@ -148,21 +156,21 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
     @Override
     protected final void onAfterProcessStart(ProcessControl process,
                                              IRuntimeConfig runtimeConfig) throws IOException {
-        ProcessOutput outputConfig = runtimeConfig.getProcessOutput();
-        LogWatchStreamProcessor logWatch = new LogWatchStreamProcessor(
-                "database system is ready to accept connections",
-                knownFailureMessages(), StreamToLineProcessor.wrap(outputConfig.getOutput()));
-        Processors.connect(process.getReader(), logWatch);
-        Processors.connect(process.getError(), StreamToLineProcessor.wrap(outputConfig.getError()));
-        logWatch.waitForResult(getConfig().timeout().startupTimeout());
         final Path pidFilePath = Paths.get(getConfig().storage().dbDir().getAbsolutePath(), "postmaster.pid");
+        final File pidFile = new File(pidFilePath.toAbsolutePath().toString());
+        int timeout = TIMEOUT;
+        while (!pidFile.exists() && ((timeout = timeout - 100) > 0)) {
+            try {
+                sleep(100);
+            } catch (InterruptedException ie) { /* safe to ignore */ }
+        }
         int pid = -1;
         try {
             pid = Integer.valueOf(readLines(pidFilePath.toFile()).get(0));
         } catch (Exception e) {
             logger.log(Level.SEVERE, format("Failed to read PID file (%s)", e.getMessage()));
         }
-        if (logWatch.isInitWithSuccess() && pid != -1) {
+        if (pid != -1) {
             setProcessId(pid);
         } else {
             // fallback, try to read pid file. will throw IOException if
@@ -170,7 +178,8 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
             // fails
             setProcessId(getPidFromFile(pidFile()));
         }
-        runCmd(getConfig(), CreateDb, "", getConfig().storage().dbName());
+        runCmd(getConfig(), CreateDb, "", new HashSet<>(singletonList("database creation failed")),
+                1000, getConfig().storage().dbName());
     }
 
     @Override

@@ -105,9 +105,4 @@ public class PostgresFilesToExtract extends FilesToExtract {
             }
         };
     }
-
-    @Override
-    public File generatedBaseDir() {
-        return super.generatedBaseDir();
-    }
 }

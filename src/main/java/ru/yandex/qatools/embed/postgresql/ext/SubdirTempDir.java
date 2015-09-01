@@ -1,5 +1,6 @@
 package ru.yandex.qatools.embed.postgresql.ext;
 
+import de.flapdoodle.embed.process.io.directories.IDirectory;
 import de.flapdoodle.embed.process.io.directories.PropertyOrPlatformTempDir;
 
 import java.io.File;
@@ -9,12 +10,12 @@ import static de.flapdoodle.embed.process.io.file.Files.createTempDir;
 
 /**
  * @author Ilya Sadykov
- * Temporary dir creating the temp dir inside of the system temp dir.
- * TODO: Be careful: the path is ThreadLocal. This might lead to some side effects
+ *         Temporary dir creating the temp dir inside of the system temp dir.
+ *         TODO: Be careful: the path is ThreadLocal. This might lead to some side effects
  */
 public class SubdirTempDir extends PropertyOrPlatformTempDir {
-
     private static final ThreadLocal<File> tempDir = new ThreadLocal<>();
+    private static SubdirTempDir _instance = new SubdirTempDir();
 
     static {
         try {
@@ -27,6 +28,10 @@ public class SubdirTempDir extends PropertyOrPlatformTempDir {
         } catch (IOException e) {
             throw new RuntimeException("Failed to create temp dir", e);
         }
+    }
+
+    public static IDirectory defaultInstance() {
+        return _instance;
     }
 
     @Override

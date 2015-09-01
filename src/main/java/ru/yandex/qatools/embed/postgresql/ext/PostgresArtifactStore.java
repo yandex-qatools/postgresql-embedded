@@ -1,10 +1,14 @@
 package ru.yandex.qatools.embed.postgresql.ext;
 
+import de.flapdoodle.embed.process.config.store.FileSet;
 import de.flapdoodle.embed.process.config.store.IDownloadConfig;
 import de.flapdoodle.embed.process.config.store.IPackageResolver;
 import de.flapdoodle.embed.process.distribution.ArchiveType;
 import de.flapdoodle.embed.process.distribution.Distribution;
-import de.flapdoodle.embed.process.extract.*;
+import de.flapdoodle.embed.process.extract.Extractors;
+import de.flapdoodle.embed.process.extract.IExtractedFileSet;
+import de.flapdoodle.embed.process.extract.IExtractor;
+import de.flapdoodle.embed.process.extract.ITempNaming;
 import de.flapdoodle.embed.process.io.directories.IDirectory;
 import de.flapdoodle.embed.process.store.ArtifactStore;
 import de.flapdoodle.embed.process.store.IDownloader;
@@ -14,7 +18,7 @@ import java.io.IOException;
 
 /**
  * @author Ilya Sadykov
- * Hacky ArtifactStore. Just to override the default FilesToExtract with PostgresFilesToExtract
+ *         Hacky ArtifactStore. Just to override the default FilesToExtract with PostgresFilesToExtract
  */
 public class PostgresArtifactStore extends ArtifactStore {
     private IDownloadConfig _downloadConfig;
@@ -26,10 +30,6 @@ public class PostgresArtifactStore extends ArtifactStore {
         _downloadConfig = downloadConfig;
         _tempDirFactory = tempDirFactory;
         _executableNaming = executableNaming;
-    }
-
-    public IDirectory getTempDir() {
-        return _tempDirFactory;
     }
 
     private static File getArtifact(IDownloadConfig runtime, Distribution distribution) {
@@ -55,6 +55,19 @@ public class PostgresArtifactStore extends ArtifactStore {
             throw new IllegalArgumentException("" + dir + " is not a Directory");
     }
 
+    public IDirectory getTempDir() {
+        return _tempDirFactory;
+    }
+
+    @Override
+    public void removeFileSet(Distribution distribution, IExtractedFileSet all) {
+        try {
+            super.removeFileSet(distribution, all);
+        } catch (IllegalArgumentException e) {
+            System.err.println("Failed to remove file set: " + e.getMessage());
+        }
+    }
+
     /**
      * Actually this entirely class does exist because of this method only!
      * TODO: Look for the more native way to override the default FilesToExtract strategy
@@ -65,8 +78,13 @@ public class PostgresArtifactStore extends ArtifactStore {
         File artifact = getArtifact(_downloadConfig, distribution);
         final ArchiveType archiveType = packageResolver.getArchiveType(distribution);
         IExtractor extractor = Extractors.getExtractor(archiveType);
-
-        return extractor.extract(_downloadConfig, artifact,
-                new PostgresFilesToExtract(_tempDirFactory, _executableNaming, packageResolver.getFileSet(distribution)));
+        try {
+            final FileSet fileSet = packageResolver.getFileSet(distribution);
+            return extractor.extract(_downloadConfig, artifact,
+                    new PostgresFilesToExtract(_tempDirFactory, _executableNaming, fileSet));
+        } catch (Exception e) {
+            System.out.println("Failed to extract file set: " + e.getMessage());
+            return new EmptyFileSet();
+        }
     }
 }
