@@ -119,8 +119,8 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
             if (tempDir != null && tempDir.asFile() != null) {
                 logger.log(Level.INFO, format("Cleaning up after the embedded process (removing %s)...",
                         tempDir.asFile().getAbsolutePath()));
+                forceDelete(tempDir.asFile());
             }
-            forceDelete(tempDir.asFile());
         }
         return result;
     }
