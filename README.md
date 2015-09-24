@@ -35,9 +35,11 @@ Here is the example of how to launch and use the embedded PostgreSQL instance
     
     // connecting to a running Postgres
     String url = format("jdbc:postgresql://%s:%s/%s?user=%s&password=%s",
-            config.net().getServerAddress().getHostAddress(),
+            config.net().host(),
             config.net().port(),
-            config.storage().dbName()
+            config.storage().dbName(),
+            config.credentials().username(),
+            config.credentials().password()
     );
     Connection conn = DriverManager.getConnection(url);
     
