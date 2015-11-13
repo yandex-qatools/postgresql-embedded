@@ -67,6 +67,7 @@ class InitDbProcess<E extends InitDbExecutable> extends AbstractPGProcess<E, Ini
             ));
         }
         ret.add(config.storage().dbDir().getAbsolutePath());
+        ret.addAll(config.getAdditionalInitDbParams());
         return ret;
     }
 
