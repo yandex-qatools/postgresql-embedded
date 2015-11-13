@@ -183,18 +183,17 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
 
     /**
      * Import into database from file
+     *
      * @param file The file to import into database
      */
     public void importFromFile(File file) {
         if (file.exists()) {
             runCmd(getConfig(), Psql, "", new HashSet<>(singletonList("import into " + getConfig().storage().dbName() + " failed")),
                     1000,
-                    new String[]{
-                            "-U", getConfig().credentials().username(),
-                            "-d", getConfig().storage().dbName(),
-                            "-h", getConfig().net().host(),
-                            "-f", file.getAbsolutePath()
-                    }
+                    "-U", getConfig().credentials().username(),
+                    "-d", getConfig().storage().dbName(),
+                    "-h", getConfig().net().host(),
+                    "-f", file.getAbsolutePath()
             );
         }
     }
