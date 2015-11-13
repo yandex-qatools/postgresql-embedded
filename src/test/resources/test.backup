@@ -1,0 +1,83 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 9.1.4
+-- Dumped by pg_dump version 9.2.0
+-- Started on 2015-11-13 15:59:02 CET
+
+SET statement_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+
+--
+-- TOC entry 162 (class 3079 OID 11907)
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- TOC entry 2120 (class 0 OID 0)
+-- Dependencies: 162
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
+SET search_path = public, pg_catalog;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- TOC entry 161 (class 1259 OID 1302590)
+-- Name: table1; Type: TABLE; Schema: public; Owner: user; Tablespace: 
+--
+
+CREATE TABLE table1 (
+    col1 character varying(255),
+    col2 integer,
+    col3 character(1)
+);
+
+
+ALTER TABLE public.table1 OWNER TO user;
+
+--
+-- TOC entry 2112 (class 0 OID 1302590)
+-- Dependencies: 161
+-- Data for Name: table1; Type: TABLE DATA; Schema: public; Owner: user
+--
+
+COPY table1 (col1, col2, col3) FROM stdin;
+test	1	a
+test	2	b
+test	3	c
+test	4	d
+\.
+
+
+--
+-- TOC entry 2119 (class 0 OID 0)
+-- Dependencies: 5
+-- Name: public; Type: ACL; Schema: -; Owner: user
+--
+
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+REVOKE ALL ON SCHEMA public FROM user;
+GRANT ALL ON SCHEMA public TO user;
+GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+-- Completed on 2015-11-13 15:59:02 CET
+
+--
+-- PostgreSQL database dump complete
+--
+

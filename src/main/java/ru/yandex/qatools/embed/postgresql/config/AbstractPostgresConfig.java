@@ -26,6 +26,7 @@ public abstract class AbstractPostgresConfig<C extends AbstractPostgresConfig> e
     protected final Timeout timeout;
     protected final Credentials credentials;
     protected List<String> args = new ArrayList<>();
+    protected List<String> additionalInitDbParams = new ArrayList<>();
 
     protected AbstractPostgresConfig(AbstractPostgresConfig config) {
         this(config.version, config.net(), config.storage, config.timeout(), config.credentials);
@@ -72,6 +73,26 @@ public abstract class AbstractPostgresConfig<C extends AbstractPostgresConfig> e
         return (C) this;
     }
 
+    /**
+     * You may add here additional arguments for the {@code initdb} executable.<br/>
+     * <p>
+     * Example.<br>
+     * to support german umlauts you would add here this additional arguments.<br/>
+     * <pre>
+     * getAdditionalInitDbParams().addAll(
+     *      java.util.Arrays.asList(
+     *          "-E", "'UTF-8'",
+     *          "--lc-collate='de_DE.UTF-8'",
+     *          "--lc-ctype=locale='de_DE.UTF-8'")
+     * )
+     * </pre>
+     *
+     * @return The list of additional parameters for the {@code initdb} executable.<br/>
+     * Not {@code null}.<br/>
+     */
+    public List<String> getAdditionalInitDbParams() {
+        return additionalInitDbParams;
+    }
 
     public static class Storage {
         private final File dbDir;

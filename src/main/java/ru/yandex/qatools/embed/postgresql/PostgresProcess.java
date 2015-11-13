@@ -27,8 +27,7 @@ import static java.lang.Thread.sleep;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.apache.commons.io.FileUtils.readLines;
-import static ru.yandex.qatools.embed.postgresql.Command.CreateDb;
-import static ru.yandex.qatools.embed.postgresql.Command.InitDb;
+import static ru.yandex.qatools.embed.postgresql.Command.*;
 import static ru.yandex.qatools.embed.postgresql.PostgresStarter.getCommand;
 import static ru.yandex.qatools.embed.postgresql.config.AbstractPostgresConfig.Storage;
 
@@ -180,6 +179,23 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
         }
         runCmd(getConfig(), CreateDb, "", new HashSet<>(singletonList("database creation failed")),
                 1000, getConfig().storage().dbName());
+    }
+
+    /**
+     * Import into database from file
+     *
+     * @param file The file to import into database
+     */
+    public void importFromFile(File file) {
+        if (file.exists()) {
+            runCmd(getConfig(), Psql, "", new HashSet<>(singletonList("import into " + getConfig().storage().dbName() + " failed")),
+                    1000,
+                    "-U", getConfig().credentials().username(),
+                    "-d", getConfig().storage().dbName(),
+                    "-h", getConfig().net().host(),
+                    "-f", file.getAbsolutePath()
+            );
+        }
     }
 
     @Override
