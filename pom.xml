@@ -94,6 +94,13 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <additionalparam>-Xdoclint:none</additionalparam>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
@@ -197,6 +204,5 @@
         <junit.version>4.12</junit.version>
         <hamcrest.version>1.3</hamcrest.version>
         <spring.version>3.2.5.RELEASE</spring.version>
-        <maven.javadoc.skip>true</maven.javadoc.skip>
     </properties>
 </project>
