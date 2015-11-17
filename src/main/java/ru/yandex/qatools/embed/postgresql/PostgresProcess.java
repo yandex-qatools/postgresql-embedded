@@ -6,10 +6,14 @@ import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.extract.IExtractedFileSet;
 import de.flapdoodle.embed.process.io.LoggingOutputStreamProcessor;
 import de.flapdoodle.embed.process.io.directories.IDirectory;
+import de.flapdoodle.embed.process.io.progress.LoggingProgressListener;
 import de.flapdoodle.embed.process.runtime.Executable;
 import de.flapdoodle.embed.process.runtime.ProcessControl;
+
+import ru.yandex.qatools.embed.postgresql.config.DownloadConfigBuilder;
 import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
 import ru.yandex.qatools.embed.postgresql.config.RuntimeConfigBuilder;
+import ru.yandex.qatools.embed.postgresql.ext.ArtifactStoreBuilder;
 import ru.yandex.qatools.embed.postgresql.ext.LogWatchStreamProcessor;
 import ru.yandex.qatools.embed.postgresql.ext.PostgresArtifactStore;
 
@@ -68,6 +72,9 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
             final RuntimeConfigBuilder rtConfigBuilder = new RuntimeConfigBuilder().defaults(cmd);
             IRuntimeConfig runtimeConfig = rtConfigBuilder
                     .processOutput(new ProcessOutput(logWatch, logWatch, logWatch))
+                    .artifactStore(new ArtifactStoreBuilder().defaults(cmd)
+                            .download(new DownloadConfigBuilder().defaultsForCommand(cmd)
+                                .progressListener(new LoggingProgressListener(logger, Level.ALL))))
                     .build();
             Executable exec = getCommand(cmd, runtimeConfig)
                     .prepare(new PostgresConfig(config).withArgs(args));
