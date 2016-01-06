@@ -28,12 +28,16 @@ public abstract class AbstractPostgresConfig<C extends AbstractPostgresConfig> e
     protected List<String> args = new ArrayList<>();
     protected List<String> additionalInitDbParams = new ArrayList<>();
 
-    protected AbstractPostgresConfig(AbstractPostgresConfig config) {
-        this(config.version, config.net(), config.storage, config.timeout(), config.credentials);
+    protected AbstractPostgresConfig(AbstractPostgresConfig config, Command postgres) {
+        this(config.version, config.net(), config.storage, config.timeout(), config.credentials, new SupportConfig(postgres));
     }
 
-    public AbstractPostgresConfig(IVersion version, Net networt, Storage storage, Timeout timeout, Credentials cred) {
-        super(version, new SupportConfig(Command.Postgres));
+    protected AbstractPostgresConfig(AbstractPostgresConfig config) {
+        this(config, Command.Postgres);
+    }
+
+    public AbstractPostgresConfig(IVersion version, Net networt, Storage storage, Timeout timeout, Credentials cred, SupportConfig supportConfig) {
+        super(version, supportConfig);
         this.network = networt;
         this.timeout = timeout;
         this.storage = storage;
@@ -41,11 +45,7 @@ public abstract class AbstractPostgresConfig<C extends AbstractPostgresConfig> e
     }
 
     public AbstractPostgresConfig(IVersion version, Net networt, Storage storage, Timeout timeout) {
-        super(version, new SupportConfig(Command.Postgres));
-        this.network = networt;
-        this.timeout = timeout;
-        this.storage = storage;
-        this.credentials = null;
+        this(version, networt, storage, timeout, null, new SupportConfig(Command.Postgres));
     }
 
     public Net net() {
@@ -125,6 +125,15 @@ public abstract class AbstractPostgresConfig<C extends AbstractPostgresConfig> e
         public String dbName() {
             return dbName;
         }
+
+        @Override
+        public String toString() {
+            return "Storage{" +
+                    "dbDir=" + dbDir +
+                    ", dbName='" + dbName + '\'' +
+                    ", isTmpDir=" + isTmpDir +
+                    '}';
+        }
     }
 
     public static class Credentials {
@@ -144,6 +153,14 @@ public abstract class AbstractPostgresConfig<C extends AbstractPostgresConfig> e
 
         public String password() {
             return password;
+        }
+
+        @Override
+        public String toString() {
+            return "Credentials{" +
+                    "username='" + username + '\'' +
+                    ", password='" + password + '\'' + //NOSONAR
+                    '}';
         }
     }
 
@@ -168,6 +185,14 @@ public abstract class AbstractPostgresConfig<C extends AbstractPostgresConfig> e
         public String host() {
             return host;
         }
+
+        @Override
+        public String toString() {
+            return "Net{" +
+                    "host='" + host + '\'' +
+                    ", port=" + port +
+                    '}';
+        }
     }
 
     public static class Timeout {
@@ -185,6 +210,24 @@ public abstract class AbstractPostgresConfig<C extends AbstractPostgresConfig> e
         public long startupTimeout() {
             return startupTimeout;
         }
+
+        @Override
+        public String toString() {
+            return "Timeout{" +
+                    "startupTimeout=" + startupTimeout +
+                    '}';
+        }
     }
 
+    @Override
+    public String toString() {
+        return "AbstractPostgresConfig{" +
+                "storage=" + storage +
+                ", network=" + network +
+                ", timeout=" + timeout +
+                ", credentials=" + credentials +
+                ", args=" + args +
+                ", additionalInitDbParams=" + additionalInitDbParams +
+                '}';
+    }
 }

@@ -1,6 +1,7 @@
 package ru.yandex.qatools.embed.postgresql.config;
 
 import de.flapdoodle.embed.process.distribution.IVersion;
+import ru.yandex.qatools.embed.postgresql.Command;
 
 import java.io.IOException;
 
@@ -10,6 +11,10 @@ import static ru.yandex.qatools.embed.postgresql.distribution.Version.Main.PRODU
  * Configuration for postgres
  */
 public class PostgresConfig extends AbstractPostgresConfig<PostgresConfig> {
+
+    public PostgresConfig(AbstractPostgresConfig config, Command command) {
+        super(config, command);
+    }
 
     public PostgresConfig(AbstractPostgresConfig config) {
         super(config);
@@ -23,8 +28,12 @@ public class PostgresConfig extends AbstractPostgresConfig<PostgresConfig> {
         this(version, new Net(host, port), new Storage(dbName), new Timeout());
     }
 
+    public PostgresConfig(IVersion version, Net networt, Storage storage, Timeout timeout, Credentials cred, Command command) {
+        super(version, networt, storage, timeout, cred, new SupportConfig(command));
+    }
+
     public PostgresConfig(IVersion version, Net networt, Storage storage, Timeout timeout, Credentials cred) {
-        super(version, networt, storage, timeout, cred);
+        this(version, networt, storage, timeout, cred, Command.Postgres);
     }
 
     public PostgresConfig(IVersion version, Net network, Storage storage, Timeout timeout) {
