@@ -138,7 +138,7 @@
         <dependency>
             <groupId>de.flapdoodle.embed</groupId>
             <artifactId>de.flapdoodle.embed.process</artifactId>
-            <version>1.50.0</version>
+            <version>1.50.1</version>
         </dependency>
 
         <dependency>
