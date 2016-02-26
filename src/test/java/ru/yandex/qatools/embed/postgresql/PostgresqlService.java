@@ -28,7 +28,7 @@ public class PostgresqlService {
                 .artifactStore(new ArtifactStoreBuilder()
                         .defaults(Command.Postgres)
                         .download(new DownloadConfigBuilder()
-                                .defaultsForCommand(Command.Postgres)
+                                .defaultsForCommand(Command.Postgres).build()
                         )
                 ).build();
         PostgresStarter<PostgresExecutable, PostgresProcess> runtime = PostgresStarter.getInstance(runtimeConfig);

@@ -9,7 +9,6 @@ import de.flapdoodle.embed.process.io.directories.IDirectory;
 import de.flapdoodle.embed.process.io.progress.LoggingProgressListener;
 import de.flapdoodle.embed.process.runtime.Executable;
 import de.flapdoodle.embed.process.runtime.ProcessControl;
-
 import ru.yandex.qatools.embed.postgresql.config.DownloadConfigBuilder;
 import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
 import ru.yandex.qatools.embed.postgresql.config.RuntimeConfigBuilder;
@@ -30,6 +29,7 @@ import static java.lang.String.format;
 import static java.lang.Thread.sleep;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.logging.Logger.getLogger;
 import static org.apache.commons.io.FileUtils.readLines;
 import static ru.yandex.qatools.embed.postgresql.Command.*;
 import static ru.yandex.qatools.embed.postgresql.PostgresStarter.getCommand;
@@ -39,7 +39,7 @@ import static ru.yandex.qatools.embed.postgresql.config.AbstractPostgresConfig.S
  * postgres process
  */
 public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, PostgresProcess> {
-    private static Logger logger = Logger.getLogger(PostgresProcess.class.getName());
+    private static Logger logger = getLogger(PostgresProcess.class.getName());
     private final IRuntimeConfig runtimeConfig;
 
     boolean stopped = false;
@@ -74,7 +74,8 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
                     .processOutput(new ProcessOutput(logWatch, logWatch, logWatch))
                     .artifactStore(new ArtifactStoreBuilder().defaults(cmd)
                             .download(new DownloadConfigBuilder().defaultsForCommand(cmd)
-                                .progressListener(new LoggingProgressListener(logger, Level.ALL))))
+                                    .progressListener(
+                                            new LoggingProgressListener(logger, Level.ALL)).build()))
                     .build();
             Executable exec = getCommand(cmd, runtimeConfig)
                     .prepare(new PostgresConfig(config).withArgs(args));
