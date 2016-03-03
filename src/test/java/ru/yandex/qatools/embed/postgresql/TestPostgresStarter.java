@@ -1,5 +1,7 @@
 package ru.yandex.qatools.embed.postgresql;
 
+import de.flapdoodle.embed.process.config.IRuntimeConfig;
+import de.flapdoodle.embed.process.io.progress.LoggingProgressListener;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,10 +29,6 @@ import static org.junit.Assert.assertThat;
 import static ru.yandex.qatools.embed.postgresql.distribution.Version.Main.PRODUCTION;
 import static ru.yandex.qatools.embed.postgresql.util.SocketUtil.findFreePort;
 
-import de.flapdoodle.embed.process.config.IRuntimeConfig;
-import de.flapdoodle.embed.process.io.progress.LoggingProgressListener;
-import de.flapdoodle.embed.process.io.progress.Slf4jProgressListener;
-
 public class TestPostgresStarter {
 
     private static final Logger logger = Logger.getLogger(TestPostgresStarter.class.getName());
@@ -50,7 +48,8 @@ public class TestPostgresStarter {
                         .defaults(Command.Postgres)
                         .download(new DownloadConfigBuilder()
                                 .defaultsForCommand(Command.Postgres)
-                                .progressListener(new LoggingProgressListener(logger, Level.ALL))))
+                                .progressListener(new LoggingProgressListener(logger, Level.ALL))
+                                .build()))
 
                 .build();
 

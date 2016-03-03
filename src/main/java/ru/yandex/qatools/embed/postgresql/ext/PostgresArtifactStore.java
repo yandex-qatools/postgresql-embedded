@@ -64,7 +64,7 @@ public class PostgresArtifactStore extends ArtifactStore {
         try {
             super.removeFileSet(distribution, all);
         } catch (IllegalArgumentException e) {
-            System.err.println("Failed to remove file set: " + e.getMessage());
+            System.err.println("Failed to remove file set: " + e.getMessage());//NOSONAR
         }
     }
 
@@ -83,7 +83,8 @@ public class PostgresArtifactStore extends ArtifactStore {
             return extractor.extract(_downloadConfig, artifact,
                     new PostgresFilesToExtract(_tempDirFactory, _executableNaming, fileSet));
         } catch (Exception e) {
-            System.out.println("Failed to extract file set: " + e.getMessage());
+            e.printStackTrace();//NOSONAR
+            System.out.println("Failed to extract file set: " + e.getMessage());//NOSONAR
             return new EmptyFileSet();
         }
     }
