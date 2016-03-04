@@ -24,7 +24,8 @@ Add the following dependency to your pom.xml:
         <version>1.10</version>
     </dependency>
 ```
-Or to build.gradle:
+### Gradle
+Add a line to build.gradle:
 ```groovy
     compile 'ru.yandex.qatools.embed:postgresql-embedded:1.10'
 ```
