@@ -21,9 +21,14 @@ Add the following dependency to your pom.xml:
     <dependency>
         <groupId>ru.yandex.qatools.embed</groupId>
         <artifactId>postgresql-embedded</artifactId>
-        <version>1.9</version>
+        <version>1.10</version>
     </dependency>
 ```
+Or to build.gradle:
+```groovy
+    compile 'ru.yandex.qatools.embed:postgresql-embedded:1.10'
+```
+
 ## Howto
 
 Here is the example of how to launch and use the embedded PostgreSQL instance
