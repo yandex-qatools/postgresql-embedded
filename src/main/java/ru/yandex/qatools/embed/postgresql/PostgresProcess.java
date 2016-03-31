@@ -20,7 +20,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -145,9 +149,11 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
             throws IOException {
         List<String> ret = new ArrayList<>();
         ret.addAll(asList(exe.executable().getAbsolutePath(),
-                "-h", config.net().host(),
-                "-p", String.valueOf(config.net().port()),
-                "-D", config.storage().dbDir().getAbsolutePath()
+                "start",
+                "-o",
+                String.format("\"-p %s\"", String.valueOf(config.net().port())),
+                "-D", config.storage().dbDir().getAbsolutePath(),
+                "-w"
         ));
 
         return ret;

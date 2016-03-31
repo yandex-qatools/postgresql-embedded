@@ -3,7 +3,7 @@ package ru.yandex.qatools.embed.postgresql;
 import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
 
 public enum Command {
-    Postgres("postgres", PostgresExecutable.class),
+    Postgres("pg_ctl", PostgresExecutable.class),
     InitDb("initdb", InitDbExecutable.class),
     CreateDb("createdb", CreateDbExecutable.class),
     PgCtl("pg_ctl", PgCtlExecutable.class),
