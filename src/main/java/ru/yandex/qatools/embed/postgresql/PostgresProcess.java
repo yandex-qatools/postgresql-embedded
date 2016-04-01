@@ -151,7 +151,9 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
         ret.addAll(asList(exe.executable().getAbsolutePath(),
                 "start",
                 "-o",
-                String.format("\"-p %s -h %s\"", config.net().port(), config.net().host()),
+                String.format("\"-p %s\"", config.net().port()),
+                "-o",
+                String.format("\"-h %s\"", config.net().host()),
                 "-D", config.storage().dbDir().getAbsolutePath(),
                 "-w"
         ));
