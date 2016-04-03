@@ -21,7 +21,7 @@ Add the following dependency to your pom.xml:
     <dependency>
         <groupId>ru.yandex.qatools.embed</groupId>
         <artifactId>postgresql-embedded</artifactId>
-        <version>1.10</version>
+        <version>1.11</version>
     </dependency>
 ```
 ### Gradle
