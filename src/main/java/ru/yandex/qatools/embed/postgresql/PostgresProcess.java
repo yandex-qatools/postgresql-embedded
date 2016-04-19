@@ -36,6 +36,7 @@ import static java.util.Collections.singletonList;
 import static java.util.logging.Logger.getLogger;
 import static org.apache.commons.io.FileUtils.readLines;
 import static ru.yandex.qatools.embed.postgresql.Command.*;
+import static ru.yandex.qatools.embed.postgresql.Command.PgDump;
 import static ru.yandex.qatools.embed.postgresql.PostgresStarter.getCommand;
 import static ru.yandex.qatools.embed.postgresql.config.AbstractPostgresConfig.Storage;
 
@@ -212,6 +213,38 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
                     "-f", file.getAbsolutePath()
             );
         }
+    }
+
+    public void exportToFile(File file) {
+        runCmd(getConfig(), PgDump, "", new HashSet<>(singletonList("export from " + getConfig().storage().dbName() + " failed")),
+                1000,
+                "-U", getConfig().credentials().username(),
+                "-d", getConfig().storage().dbName(),
+                "-h", getConfig().net().host(),
+                "-f", file.getAbsolutePath()
+        );
+    }
+
+    public void exportSchemeToFile(File file) {
+        runCmd(getConfig(), PgDump, "", new HashSet<>(singletonList("export from " + getConfig().storage().dbName() + " failed")),
+                1000,
+                "-U", getConfig().credentials().username(),
+                "-d", getConfig().storage().dbName(),
+                "-h", getConfig().net().host(),
+                "-f", file.getAbsolutePath(),
+                "-s"
+        );
+    }
+
+    public void exportDataToFile(File file) {
+        runCmd(getConfig(), PgDump, "", new HashSet<>(singletonList("export from " + getConfig().storage().dbName() + " failed")),
+                1000,
+                "-U", getConfig().credentials().username(),
+                "-d", getConfig().storage().dbName(),
+                "-h", getConfig().net().host(),
+                "-f", file.getAbsolutePath(),
+                "-a"
+        );
     }
 
     @Override
