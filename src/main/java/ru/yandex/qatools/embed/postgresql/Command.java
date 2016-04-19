@@ -8,6 +8,7 @@ public enum Command {
     CreateDb("createdb", CreateDbExecutable.class),
     PgCtl("pg_ctl", PgCtlExecutable.class),
     Psql("psql", PsqlExecutable.class),
+    PgDump("pg_dump", PsqlExecutable.class),
     Createuser("createuser", PsqlExecutable.class),
     ;
 
