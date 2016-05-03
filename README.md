@@ -65,6 +65,13 @@ Here is the example of how to launch and use the embedded PostgreSQL instance
     process.stop();
 ```
 
+### Important Notes
+* PostgreSQL server is known to not start under the privileged user (which means you cannot start it under root/Administrator of your system): `initdb must be run as the user that will own the server process, because the server needs to have access to the files and directories that initdb creates. Since the server cannot be run as root, you must not run initdb as root either. (It will in fact refuse to do so.)` ([link](http://www.postgresql.org/docs/9.5/static/app-initdb.html)). However some users have launched it successfully on Windows under Administrator, so you can try anyway.
+* It is also required to set up the LANG environment variable within your system (assuming you're on Linux):
+`export LC_ALL=en_US.UTF-8`
+
+
+
 ### Supported Versions
 
 Versions: 9.5.0, 9.4.4, 9.4.1, 9.3.5, 9.2.4, any custom
