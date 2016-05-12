@@ -25,9 +25,12 @@ class PgCtlProcess<E extends PgCtlExecutable> extends AbstractPGProcess<E, PgCtl
     protected List<String> getCommandLine(Distribution distribution, PostgresConfig config, IExtractedFileSet exe)
             throws IOException {
         List<String> ret = new ArrayList<>();
-        ret.add(exe.executable().getAbsolutePath());
-        ret.addAll(asList(
-                "-D", config.storage().dbDir().getAbsolutePath()
+        ret.addAll(asList(exe.executable().getAbsolutePath(),
+                "start",
+                "-o",
+                String.format("\"-p %s -h %s\"", config.net().port(), config.net().host()),
+                "-D", config.storage().dbDir().getAbsolutePath(),
+                "-w"
         ));
         ret.addAll(
                 config.args()

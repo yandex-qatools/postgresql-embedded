@@ -1,6 +1,8 @@
 package ru.yandex.qatools.embed.postgresql.ext;
 
 import de.flapdoodle.embed.process.io.IStreamProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
@@ -12,6 +14,7 @@ public class LogWatchStreamProcessor extends de.flapdoodle.embed.process.io.LogW
     private final String success;
     private final Set<String> failures;
     private volatile boolean found = false;
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogWatchStreamProcessor.class);
 
     public LogWatchStreamProcessor(String success, Set<String> failures, IStreamProcessor destination) {
         super(success, failures, destination);
@@ -21,6 +24,7 @@ public class LogWatchStreamProcessor extends de.flapdoodle.embed.process.io.LogW
 
     @Override
     public void process(String block) {
+        LOGGER.debug(block);
         if (containsSuccess(block) || containsFailure(block)) {
             synchronized (mutex) {
                 found = true;
