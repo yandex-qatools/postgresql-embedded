@@ -28,9 +28,11 @@ import static de.flapdoodle.embed.process.io.file.Files.forceDelete;
 import static java.lang.String.format;
 import static java.lang.Thread.sleep;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.logging.Logger.getLogger;
 import static org.apache.commons.io.FileUtils.readLines;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static ru.yandex.qatools.embed.postgresql.Command.*;
 import static ru.yandex.qatools.embed.postgresql.PostgresStarter.getCommand;
 import static ru.yandex.qatools.embed.postgresql.config.AbstractPostgresConfig.Storage;
@@ -39,9 +41,11 @@ import static ru.yandex.qatools.embed.postgresql.config.AbstractPostgresConfig.S
  * postgres process
  */
 public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, PostgresProcess> {
+    public static final int MAX_CREATEDB_TRIALS = 3;
     private static Logger logger = getLogger(PostgresProcess.class.getName());
     private final IRuntimeConfig runtimeConfig;
 
+    volatile boolean processReady = false;
     boolean stopped = false;
 
     public PostgresProcess(Distribution distribution, PostgresConfig config,
@@ -58,12 +62,12 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
         return shutdownPostgres(config, new RuntimeConfigBuilder().defaults(Command.PgCtl).build());
     }
 
-    private static boolean runCmd(
+    private static String runCmd(
             PostgresConfig config, IRuntimeConfig runtimeConfig, Command cmd, String successOutput, int timeout, String... args) {
         return runCmd(config, runtimeConfig, cmd, successOutput, Collections.<String>emptySet(), timeout, args);
     }
 
-    private static boolean runCmd(
+    private static String runCmd(
             PostgresConfig config, IRuntimeConfig runtimeConfig, Command cmd, String successOutput, Set<String> failOutput, long timeout, String... args) {
         try {
             LogWatchStreamProcessor logWatch = new LogWatchStreamProcessor(successOutput,
@@ -81,16 +85,16 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
             AbstractPGProcess proc = exec.start();
             logWatch.waitForResult(timeout);
             proc.waitFor();
-            return true;
+            return logWatch.getOutput();
         } catch (IOException | InterruptedException e) {
             logger.log(Level.WARNING, e.getMessage());
         }
-        return false;
+        return null;
     }
 
     private static boolean shutdownPostgres(PostgresConfig config, IRuntimeConfig runtimeConfig) {
         try {
-            return runCmd(config, runtimeConfig, Command.PgCtl, "server stopped", 1000, "stop");
+            return isEmpty(runCmd(config, runtimeConfig, Command.PgCtl, "server stopped", 1000, "stop"));
         } catch (Exception e) {
             logger.log(Level.WARNING, "Failed to stop postgres by pg_ctl!");
         }
@@ -202,13 +206,22 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
         if (pid != -1) {
             setProcessId(pid);
         } else {
-            // fallback, try to read pid file. will throw IOException if
-            // that
-            // fails
+            // fallback, try to read pid file. will throw IOException if that fails
             setProcessId(getPidFromFile(pidFile()));
         }
-        runCmd(getConfig(), runtimeConfig, CreateDb, "", new HashSet<>(singletonList("database creation failed")),
-                1000, getConfig().storage().dbName());
+        int trial = 0;
+        do {
+            String output = runCmd(getConfig(), runtimeConfig, CreateDb, "",
+                    new HashSet<>(singleton("database creation failed")), 3000, getConfig().storage().dbName());
+            try {
+                if (isEmpty(output) || !output.contains("could not connect to database")) {
+                    break;
+                }
+                logger.log(Level.WARNING,
+                        format("Could not create database first time (%s of %s trials)", trial, MAX_CREATEDB_TRIALS));
+                sleep(100);
+            } catch (InterruptedException ie) { /* safe to ignore */ }
+        } while (trial++ < MAX_CREATEDB_TRIALS);
     }
 
     /**
@@ -262,6 +275,10 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
                 "-f", file.getAbsolutePath(),
                 "-a"
         );
+    }
+
+    public boolean isProcessReady() {
+        return processReady;
     }
 
     @Override

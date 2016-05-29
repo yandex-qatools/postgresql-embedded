@@ -6,15 +6,18 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
 /**
  * @author Ilya Sadykov
  */
 public class LogWatchStreamProcessor extends de.flapdoodle.embed.process.io.LogWatchStreamProcessor {
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogWatchStreamProcessor.class);
+    private final StringBuilder output = new StringBuilder();
     private final Object mutex = new Object();
     private final String success;
     private final Set<String> failures;
     private volatile boolean found = false;
-    private static final Logger LOGGER = LoggerFactory.getLogger(LogWatchStreamProcessor.class);
 
     public LogWatchStreamProcessor(String success, Set<String> failures, IStreamProcessor destination) {
         super(success, failures, destination);
@@ -25,6 +28,7 @@ public class LogWatchStreamProcessor extends de.flapdoodle.embed.process.io.LogW
     @Override
     public void process(String block) {
         LOGGER.debug(block);
+        output.append(block).append("\n");
         if (containsSuccess(block) || containsFailure(block)) {
             synchronized (mutex) {
                 found = true;
@@ -58,5 +62,11 @@ public class LogWatchStreamProcessor extends de.flapdoodle.embed.process.io.LogW
                 e.printStackTrace();
             }
         }
+    }
+
+    @Override
+    public String getOutput() {
+        String res = output.toString();
+        return isEmpty(res) ? null : res;
     }
 }

@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 
 import static java.lang.String.format;
+import static java.lang.Thread.sleep;
 import static ru.yandex.qatools.embed.postgresql.distribution.Version.Main.PRODUCTION;
 import static ru.yandex.qatools.embed.postgresql.util.SocketUtil.findFreePort;
 
@@ -37,6 +38,9 @@ public class PostgresqlService {
                 new AbstractPostgresConfig.Credentials("user", "password"));
         PostgresExecutable exec = runtime.prepare(config);
         process = exec.start();
+        for (int trial = 0; trial < 10 && !process.isProcessReady(); ++trial) {
+            sleep(100);
+        }
         String url = format("jdbc:postgresql://%s:%s/%s?user=%s&password=%s",
                 config.net().host(),
                 config.net().port(),
