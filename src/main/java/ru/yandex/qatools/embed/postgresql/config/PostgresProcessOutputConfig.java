@@ -8,12 +8,14 @@ import ru.yandex.qatools.embed.postgresql.Command;
  */
 public class PostgresProcessOutputConfig {
 
-	public static ProcessOutput getDefaultInstance(Command command) {
-		return ProcessOutput.getDefaultInstance(command.commandName());
-	}
+    private PostgresProcessOutputConfig() {}
 
-	public static ProcessOutput getInstance(Command command, org.slf4j.Logger logger) {
-		return ProcessOutput.getInstance(command.commandName(), logger);
-	}
+    public static ProcessOutput getDefaultInstance(Command command) {
+        return ProcessOutput.getDefaultInstance(command.commandName());
+    }
+
+    public static ProcessOutput getInstance(Command command, org.slf4j.Logger logger) {
+        return ProcessOutput.getInstance(command.commandName(), logger);
+    }
 
 }

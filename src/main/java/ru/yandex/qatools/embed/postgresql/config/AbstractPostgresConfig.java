@@ -73,6 +73,12 @@ public abstract class AbstractPostgresConfig<C extends AbstractPostgresConfig> e
         return (C) this;
     }
 
+    public C withAdditionalInitDbParams(List<String> additionalInitDbParams) {
+        this.additionalInitDbParams.addAll(additionalInitDbParams);
+        return (C) this;
+    }
+
+
     /**
      * You may add here additional arguments for the {@code initdb} executable.<br/>
      * <p>
