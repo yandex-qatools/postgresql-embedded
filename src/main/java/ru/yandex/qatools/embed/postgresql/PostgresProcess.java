@@ -80,8 +80,12 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
                                     .progressListener(new LoggingProgressListener(logger, Level.ALL)).build()))
                     .commandLinePostProcessor(runtimeConfig.getCommandLinePostProcessor()).build();
 
+            final PostgresConfig postgresConfig = new PostgresConfig(config).withArgs(args);
+            if (Command.InitDb == cmd) {
+                postgresConfig.withAdditionalInitDbParams(config.getAdditionalInitDbParams());
+            }
             Executable<?, ? extends AbstractPGProcess> exec = getCommand(cmd, runtimeCfg)
-                    .prepare(new PostgresConfig(config).withArgs(args));
+                    .prepare(postgresConfig);
             AbstractPGProcess proc = exec.start();
             logWatch.waitForResult(timeout);
             proc.waitFor();
@@ -99,13 +103,6 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
             logger.log(Level.WARNING, "Failed to stop postgres by pg_ctl!");
         }
         return false;
-    }
-
-    protected Set<String> knownFailureMessages() {
-        HashSet<String> ret = new HashSet<>();
-        ret.add("failed errno");
-        ret.add("[postgres error]");
-        return ret;
     }
 
     @Override

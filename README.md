@@ -15,13 +15,16 @@ Please consider using the [embedded-services](https://github.com/yandex-qatools/
 * You can start your development environment with the PostgreSQL embedded with the single command
 
 ### Maven
-
+Until version 1.16 or later does not include this: checkout this version and build it with maven
+```groovy
+mvn clean install
+```
 Add the following dependency to your pom.xml:
 ```xml
     <dependency>
         <groupId>ru.yandex.qatools.embed</groupId>
         <artifactId>postgresql-embedded</artifactId>
-        <version>1.15</version>
+        <version>1.16-SNAPSHOT</version>
     </dependency>
 ```
 ### Gradle
@@ -34,10 +37,21 @@ Add a line to build.gradle:
 
 Here is the example of how to launch and use the embedded PostgreSQL instance
 ```java
+    // define of retreive db name and credentials
+    final String name = "yourDbname";
+    final String username = "yourUser";
+    final String password = "youPassword";
 
     // starting Postgres
-    PostgresStarter<PostgresExecutable, PostgresProcess> runtime = PostgresStarter.getDefaultInstance();
-    final PostgresConfig config = PostgresConfig.defaultWithDbName("test");
+    final PostgresStarter<PostgresExecutable, PostgresProcess> runtime = PostgresStarter.getDefaultInstance();
+    final PostgresConfig config = PostgresConfig.defaultWithDbName(name, username, password);
+    // pass info regarding encoding, locale, collate, ctype, instead of setting global environment settings
+    config.getAdditionalInitDbParams().addAll(asList(
+        "-E", "UTF-8",
+        "--locale=en_US.UTF-8",
+        "--lc-collate=en_US.UTF-8",
+        "--lc-ctype=en_US.UTF-8"
+    ));
     PostgresExecutable exec = runtime.prepare(config);
     PostgresProcess process = exec.start();
     
@@ -57,21 +71,19 @@ Here is the example of how to launch and use the embedded PostgreSQL instance
     final Statement statement = conn.createStatement();
     assertThat(statement.execute("SELECT * FROM films;"), is(true));
     assertThat(statement.getResultSet().next(), is(true));
-                
-    // stopping Postgres
+
+    // close db connection
     conn.close();
+
+    // stop Postgres
     process.stop();
 ```
 
 ### Important Notes
 * PostgreSQL server is known to not start under the privileged user (which means you cannot start it under root/Administrator of your system): `initdb must be run as the user that will own the server process, because the server needs to have access to the files and directories that initdb creates. Since the server cannot be run as root, you must not run initdb as root either. (It will in fact refuse to do so.)` ([link](http://www.postgresql.org/docs/9.5/static/app-initdb.html)). However some users have launched it successfully on Windows under Administrator, so you can try anyway.
-* It is also required to set up the LANG environment variable within your system (assuming you're on Linux):
-`export LC_ALL=en_US.UTF-8`
-
-
+* It is no longer required to set up the LANG environment variable within your system, just pass that config as additionalInitDbParams.
 
 ### Supported Versions
-
 Versions: 9.5.0, 9.4.4, 9.4.1, 9.3.5, 9.2.4, any custom
 Support for Linux, Windows and MacOSX.
 

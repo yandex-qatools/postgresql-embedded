@@ -46,8 +46,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.5.1</version>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>${jdk}</source>
+                    <target>${jdk}</target>
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
@@ -201,25 +201,19 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.12</version>
+            <version>${deps.slf4j}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
-            <version>1.7.10</version>
+            <version>${deps.slf4j}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jul-to-slf4j</artifactId>
-            <version>1.7.10</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.10</version>
+            <version>${deps.slf4j}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -235,5 +229,7 @@
         <junit.version>4.12</junit.version>
         <hamcrest.version>1.3</hamcrest.version>
         <spring.version>3.2.5.RELEASE</spring.version>
+        <deps.slf4j>1.7.12</deps.slf4j>
+        <jdk>1.8</jdk>
     </properties>
 </project>
