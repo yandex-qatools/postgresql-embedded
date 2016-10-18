@@ -15,22 +15,20 @@ Please consider using the [embedded-services](https://github.com/yandex-qatools/
 * You can start your development environment with the PostgreSQL embedded with the single command
 
 ### Maven
-Until version 1.16 or later does not include this: checkout this version and build it with maven
-```groovy
-mvn clean install
-```
+
 Add the following dependency to your pom.xml:
 ```xml
     <dependency>
         <groupId>ru.yandex.qatools.embed</groupId>
         <artifactId>postgresql-embedded</artifactId>
-        <version>1.16-SNAPSHOT</version>
+        <version>1.16</version>
     </dependency>
 ```
 ### Gradle
+
 Add a line to build.gradle:
 ```groovy
-    compile 'ru.yandex.qatools.embed:postgresql-embedded:1.15'
+    compile 'ru.yandex.qatools.embed:postgresql-embedded:1.16'
 ```
 
 ## Howto
@@ -80,7 +78,13 @@ Here is the example of how to launch and use the embedded PostgreSQL instance
 ```
 
 ### Important Notes
-* PostgreSQL server is known to not start under the privileged user (which means you cannot start it under root/Administrator of your system): `initdb must be run as the user that will own the server process, because the server needs to have access to the files and directories that initdb creates. Since the server cannot be run as root, you must not run initdb as root either. (It will in fact refuse to do so.)` ([link](http://www.postgresql.org/docs/9.5/static/app-initdb.html)). However some users have launched it successfully on Windows under Administrator, so you can try anyway.
+* PostgreSQL server is known to not start under the privileged user (which means you cannot start it under root/Administrator of your system):  
+
+> `initdb must be run as the user that will own the server process, because the server needs to have access to the files and directories that initdb creates. Since the server cannot be run as root, you must not run initdb as root either. (It will in fact refuse to do so.)` 
+  ([link](http://www.postgresql.org/docs/9.5/static/app-initdb.html)).   
+  
+  However some users have launched it successfully on Windows under Administrator, so you can try anyway. 
+  
 * It is no longer required to set up the LANG environment variable within your system, just pass that config as additionalInitDbParams.
 
 ### Supported Versions
