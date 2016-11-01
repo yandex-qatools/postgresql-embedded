@@ -64,6 +64,11 @@ Here is the example of how to launch and use the embedded PostgreSQL instance
     // feeding up the database
     conn.createStatement().execute("CREATE TABLE films (code char(5));");
     conn.createStatement().execute("INSERT INTO films VALUES ('movie');");
+
+    // ... or you can execute SQL files...
+    //pgProcess.importFromFile(new File("someFile.sql"))
+    // ... or even SQL files with PSQL variables in them...
+    //pgProcess.importFromFileWithArgs(new File("someFile.sql"), "-v", "tblName=someTable")
     
     // performing some assertions
     final Statement statement = conn.createStatement();

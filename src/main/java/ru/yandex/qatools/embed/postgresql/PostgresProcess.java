@@ -9,6 +9,7 @@ import de.flapdoodle.embed.process.io.directories.IDirectory;
 import de.flapdoodle.embed.process.io.progress.LoggingProgressListener;
 import de.flapdoodle.embed.process.runtime.Executable;
 import de.flapdoodle.embed.process.runtime.ProcessControl;
+import org.apache.commons.lang3.ArrayUtils;
 import ru.yandex.qatools.embed.postgresql.config.DownloadConfigBuilder;
 import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
 import ru.yandex.qatools.embed.postgresql.config.RuntimeConfigBuilder;
@@ -227,15 +228,27 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
      * @param file The file to import into database
      */
     public void importFromFile(File file) {
+        importFromFileWithArgs(file);
+    }
+
+    /**
+     * Import into database from file with additional args
+     *
+     * @param file
+     * @param cliArgs additional arguments for psql (be sure to separate args from their values)
+     */
+    public void importFromFileWithArgs(File file,String... cliArgs) {
         if (file.exists()) {
-            runCmd(getConfig(), runtimeConfig, Psql, "", new HashSet<>(singletonList("import into " + getConfig().storage().dbName() + " failed")),
-                    1000,
+            String[] args = {
                     "-U", getConfig().credentials().username(),
                     "-d", getConfig().storage().dbName(),
                     "-h", getConfig().net().host(),
                     "-p", String.valueOf(getConfig().net().port()),
-                    "-f", file.getAbsolutePath()
-            );
+                    "-f", file.getAbsolutePath()};
+            if(cliArgs != null && cliArgs.length != 0) {
+                args = ArrayUtils.addAll(args, cliArgs);
+            }
+            runCmd(getConfig(), runtimeConfig, Psql, "", new HashSet<>(singletonList("import into " + getConfig().storage().dbName() + " failed")), 1000, args);
         }
     }
 
