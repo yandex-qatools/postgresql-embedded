@@ -35,7 +35,7 @@ Add a line to build.gradle:
 
 Here is the example of how to launch and use the embedded PostgreSQL instance
 ```java
-    // define of retreive db name and credentials
+    // define of retrieve db name and credentials
     final String name = "yourDbname";
     final String username = "yourUser";
     final String password = "youPassword";
@@ -54,10 +54,12 @@ Here is the example of how to launch and use the embedded PostgreSQL instance
     PostgresProcess process = exec.start();
     
     // connecting to a running Postgres
-    String url = format("jdbc:postgresql://%s:%s/%s",
+    String url = format("jdbc:postgresql://%s:%s/%s?currentSchema=public&user=%s&password=%s",
             config.net().host(),
             config.net().port(),
-            config.storage().dbName()
+            config.storage().dbName(),
+            config.credentials().username(),
+            config.credentials().password()
     );
     Connection conn = DriverManager.getConnection(url);
     
