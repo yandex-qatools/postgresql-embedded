@@ -76,9 +76,7 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
 
             IRuntimeConfig runtimeCfg = new RuntimeConfigBuilder().defaults(cmd)
                     .processOutput(new ProcessOutput(logWatch, logWatch, logWatch))
-                    .artifactStore(new ArtifactStoreBuilder().defaults(cmd)
-                            .download(new DownloadConfigBuilder().defaultsForCommand(cmd)
-                                    .progressListener(new LoggingProgressListener(logger, Level.ALL)).build()))
+                    .artifactStore(runtimeConfig.getArtifactStore())
                     .commandLinePostProcessor(runtimeConfig.getCommandLinePostProcessor()).build();
 
             final PostgresConfig postgresConfig = new PostgresConfig(config).withArgs(args);
