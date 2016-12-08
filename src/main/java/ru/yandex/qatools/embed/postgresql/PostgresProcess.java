@@ -6,14 +6,11 @@ import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.extract.IExtractedFileSet;
 import de.flapdoodle.embed.process.io.LoggingOutputStreamProcessor;
 import de.flapdoodle.embed.process.io.directories.IDirectory;
-import de.flapdoodle.embed.process.io.progress.LoggingProgressListener;
 import de.flapdoodle.embed.process.runtime.Executable;
 import de.flapdoodle.embed.process.runtime.ProcessControl;
 import org.apache.commons.lang3.ArrayUtils;
-import ru.yandex.qatools.embed.postgresql.config.DownloadConfigBuilder;
 import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
 import ru.yandex.qatools.embed.postgresql.config.RuntimeConfigBuilder;
-import ru.yandex.qatools.embed.postgresql.ext.ArtifactStoreBuilder;
 import ru.yandex.qatools.embed.postgresql.ext.LogWatchStreamProcessor;
 import ru.yandex.qatools.embed.postgresql.ext.PostgresArtifactStore;
 
