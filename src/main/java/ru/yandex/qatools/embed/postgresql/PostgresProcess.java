@@ -2,6 +2,7 @@ package ru.yandex.qatools.embed.postgresql;
 
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.config.io.ProcessOutput;
+import de.flapdoodle.embed.process.config.store.IDownloadConfig;
 import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.extract.IExtractedFileSet;
 import de.flapdoodle.embed.process.io.LoggingOutputStreamProcessor;
@@ -9,6 +10,7 @@ import de.flapdoodle.embed.process.io.directories.IDirectory;
 import de.flapdoodle.embed.process.io.progress.LoggingProgressListener;
 import de.flapdoodle.embed.process.runtime.Executable;
 import de.flapdoodle.embed.process.runtime.ProcessControl;
+import de.flapdoodle.embed.process.store.IArtifactStore;
 import org.apache.commons.lang3.ArrayUtils;
 import ru.yandex.qatools.embed.postgresql.config.DownloadConfigBuilder;
 import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
@@ -21,7 +23,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,9 +40,13 @@ import static java.util.Collections.singletonList;
 import static java.util.logging.Logger.getLogger;
 import static org.apache.commons.io.FileUtils.readLines;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static ru.yandex.qatools.embed.postgresql.Command.*;
+import static ru.yandex.qatools.embed.postgresql.Command.CreateDb;
+import static ru.yandex.qatools.embed.postgresql.Command.InitDb;
+import static ru.yandex.qatools.embed.postgresql.Command.PgDump;
+import static ru.yandex.qatools.embed.postgresql.Command.Psql;
 import static ru.yandex.qatools.embed.postgresql.PostgresStarter.getCommand;
 import static ru.yandex.qatools.embed.postgresql.config.AbstractPostgresConfig.Storage;
+import static ru.yandex.qatools.embed.postgresql.util.ReflectUtil.setFinalField;
 
 /**
  * postgres process
@@ -74,12 +84,27 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
             LogWatchStreamProcessor logWatch = new LogWatchStreamProcessor(successOutput,
                     failOutput, new LoggingOutputStreamProcessor(logger, Level.ALL));
 
-            IRuntimeConfig runtimeCfg = new RuntimeConfigBuilder().defaults(cmd)
+            IArtifactStore artifactStore = runtimeConfig.getArtifactStore();
+            IDownloadConfig downloadCfg = ((PostgresArtifactStore) artifactStore).getDownloadConfig();
+
+            // TODO: very hacky and unreliable way to respect the parent command's configuration
+            try { //NOSONAR
+                setFinalField(downloadCfg, "_packageResolver", new PackagePaths(cmd));
+                setFinalField(artifactStore, "_downloadConfig", downloadCfg);
+            } catch (Exception e) {
+                // fallback to the default config
+                logger.log(Level.SEVERE, "Could not use the configured artifact store for cmd, " +
+                        "falling back to default " + cmd, e);
+                downloadCfg = new DownloadConfigBuilder().defaultsForCommand(cmd)
+                        .progressListener(new LoggingProgressListener(logger, Level.ALL)).build();
+                artifactStore = new ArtifactStoreBuilder().defaults(cmd).download(downloadCfg).build();
+            }
+
+            final IRuntimeConfig runtimeCfg = new RuntimeConfigBuilder().defaults(cmd)
                     .processOutput(new ProcessOutput(logWatch, logWatch, logWatch))
-                    .artifactStore(new ArtifactStoreBuilder().defaults(cmd)
-                            .download(new DownloadConfigBuilder().defaultsForCommand(cmd)
-                                    .progressListener(new LoggingProgressListener(logger, Level.ALL)).build()))
+                    .artifactStore(artifactStore)
                     .commandLinePostProcessor(runtimeConfig.getCommandLinePostProcessor()).build();
+
 
             final PostgresConfig postgresConfig = new PostgresConfig(config).withArgs(args);
             if (Command.InitDb == cmd) {
@@ -237,7 +262,7 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
      * @param file
      * @param cliArgs additional arguments for psql (be sure to separate args from their values)
      */
-    public void importFromFileWithArgs(File file,String... cliArgs) {
+    public void importFromFileWithArgs(File file, String... cliArgs) {
         if (file.exists()) {
             String[] args = {
                     "-U", getConfig().credentials().username(),
@@ -245,7 +270,7 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
                     "-h", getConfig().net().host(),
                     "-p", String.valueOf(getConfig().net().port()),
                     "-f", file.getAbsolutePath()};
-            if(cliArgs != null && cliArgs.length != 0) {
+            if (cliArgs != null && cliArgs.length != 0) {
                 args = ArrayUtils.addAll(args, cliArgs);
             }
             runCmd(getConfig(), runtimeConfig, Psql, "", new HashSet<>(singletonList("import into " + getConfig().storage().dbName() + " failed")), 1000, args);

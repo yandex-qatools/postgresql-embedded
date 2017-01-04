@@ -22,6 +22,7 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
@@ -32,10 +33,9 @@ import static ru.yandex.qatools.embed.postgresql.util.SocketUtil.findFreePort;
 public class TestPostgresStarter {
 
     private static final Logger logger = Logger.getLogger(TestPostgresStarter.class.getName());
-
+    private final TestHandler testHandler = new TestHandler();
     private PostgresProcess process;
     private Connection conn;
-    private final TestHandler testHandler = new TestHandler();
 
     @Before
     public void setUp() throws Exception {
@@ -58,6 +58,12 @@ public class TestPostgresStarter {
                 "localhost", findFreePort()
         ), new AbstractPostgresConfig.Storage("test"), new AbstractPostgresConfig.Timeout(),
                 new AbstractPostgresConfig.Credentials("user", "password"));
+        config.getAdditionalInitDbParams().addAll(asList(
+                "-E", "SQL_ASCII",
+                "--locale=C",
+                "--lc-collate=C",
+                "--lc-ctype=C"
+        ));
 
         PostgresExecutable exec = runtime.prepare(config);
         process = exec.start();

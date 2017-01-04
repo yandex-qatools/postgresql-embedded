@@ -68,6 +68,10 @@ public class PostgresArtifactStore extends ArtifactStore {
         }
     }
 
+    public IDownloadConfig getDownloadConfig() {
+        return _downloadConfig;
+    }
+
     /**
      * Actually this entirely class does exist because of this method only!
      * TODO: Look for the more native way to override the default FilesToExtract strategy

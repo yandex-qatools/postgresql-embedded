@@ -12,6 +12,7 @@ import java.sql.DriverManager;
 
 import static java.lang.String.format;
 import static java.lang.Thread.sleep;
+import static java.util.Arrays.asList;
 import static ru.yandex.qatools.embed.postgresql.distribution.Version.Main.PRODUCTION;
 import static ru.yandex.qatools.embed.postgresql.util.SocketUtil.findFreePort;
 
@@ -36,6 +37,12 @@ public class PostgresqlService {
         final PostgresConfig config = new PostgresConfig(PRODUCTION, new AbstractPostgresConfig.Net("localhost", findFreePort()),
                 new AbstractPostgresConfig.Storage("test"), new AbstractPostgresConfig.Timeout(),
                 new AbstractPostgresConfig.Credentials("user", "password"));
+        config.getAdditionalInitDbParams().addAll(asList(
+                "-E", "SQL_ASCII",
+                "--locale=C",
+                "--lc-collate=C",
+                "--lc-ctype=C"
+        ));
         PostgresExecutable exec = runtime.prepare(config);
         process = exec.start();
         for (int trial = 0; trial < 10 && !process.isProcessReady(); ++trial) {
