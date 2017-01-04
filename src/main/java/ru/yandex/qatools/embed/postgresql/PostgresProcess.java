@@ -88,12 +88,13 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
             IDownloadConfig downloadCfg = ((PostgresArtifactStore) artifactStore).getDownloadConfig();
 
             // TODO: very hacky and unreliable way to respect the parent command's configuration
-            try {
+            try { //NOSONAR
                 setFinalField(downloadCfg, "_packageResolver", new PackagePaths(cmd));
                 setFinalField(artifactStore, "_downloadConfig", downloadCfg);
             } catch (Exception e) {
                 // fallback to the default config
-                logger.log(Level.SEVERE, "Could not use the configured artifact store for cmd " + cmd + "\n" + e.getMessage());
+                logger.log(Level.SEVERE, "Could not use the configured artifact store for cmd, " +
+                        "falling back to default " + cmd, e);
                 downloadCfg = new DownloadConfigBuilder().defaultsForCommand(cmd)
                         .progressListener(new LoggingProgressListener(logger, Level.ALL)).build();
                 artifactStore = new ArtifactStoreBuilder().defaults(cmd).download(downloadCfg).build();

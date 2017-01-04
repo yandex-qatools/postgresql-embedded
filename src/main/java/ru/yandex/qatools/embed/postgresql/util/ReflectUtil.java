@@ -6,9 +6,13 @@ import java.lang.reflect.Modifier;
 /**
  * @author Ilya Sadykov
  */
-public class ReflectUtil {
+public final class ReflectUtil {
 
-    public static void setFinalField(Object object, String fieldName, Object newValue) throws NoSuchFieldException, IllegalAccessException {
+    private ReflectUtil() {
+    }
+
+    public static void setFinalField(Object object, String fieldName, Object newValue)
+            throws NoSuchFieldException, IllegalAccessException { //NOSONAR
         assert object != null;
         assert fieldName != null;
         final Field field = object.getClass().getDeclaredField(fieldName);
