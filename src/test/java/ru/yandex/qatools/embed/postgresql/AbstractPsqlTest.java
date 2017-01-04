@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static ru.yandex.qatools.embed.postgresql.distribution.Version.Main.PRODUCTION;
 import static ru.yandex.qatools.embed.postgresql.util.SocketUtil.findFreePort;
 
@@ -26,6 +27,12 @@ public abstract class AbstractPsqlTest {
                 "localhost", findFreePort()
         ), new AbstractPostgresConfig.Storage("test"), new AbstractPostgresConfig.Timeout(),
                 new AbstractPostgresConfig.Credentials("user", "password"));
+        config.getAdditionalInitDbParams().addAll(asList(
+                "-E", "UTF-8",
+                "--locale=en_US.UTF-8",
+                "--lc-collate=en_US.UTF-8",
+                "--lc-ctype=en_US.UTF-8"
+        ));
         PostgresExecutable exec = runtime.prepare(config);
         process = exec.start();
         String url = format("jdbc:postgresql://%s:%s/%s?user=%s&password=%s",

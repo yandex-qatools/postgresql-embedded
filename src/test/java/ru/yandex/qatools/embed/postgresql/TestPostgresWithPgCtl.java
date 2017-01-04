@@ -14,6 +14,7 @@ import java.sql.Statement;
 
 import static java.lang.String.format;
 import static java.lang.Thread.sleep;
+import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
@@ -33,6 +34,12 @@ public class TestPostgresWithPgCtl {
                 "localhost", findFreePort()
         ), new AbstractPostgresConfig.Storage("test"), new AbstractPostgresConfig.Timeout(),
                 new AbstractPostgresConfig.Credentials("user", "password"), Command.PgCtl);
+        config.getAdditionalInitDbParams().addAll(asList(
+                "-E", "UTF-8",
+                "--locale=en_US.UTF-8",
+                "--lc-collate=en_US.UTF-8",
+                "--lc-ctype=en_US.UTF-8"
+        ));
         PostgresExecutable exec = runtime.prepare(config);
         process = exec.start();
         sleep(2000);
