@@ -11,8 +11,8 @@ public final class ReflectUtil {
     private ReflectUtil() {
     }
 
-    public static void setFinalField(Object object, String fieldName, Object newValue)
-            throws NoSuchFieldException, IllegalAccessException { //NOSONAR
+    public static void setFinalField(Object object, String fieldName, Object newValue)//NOSONAR
+            throws NoSuchFieldException, IllegalAccessException {
         assert object != null;
         assert fieldName != null;
         final Field field = object.getClass().getDeclaredField(fieldName);

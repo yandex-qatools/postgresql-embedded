@@ -59,10 +59,10 @@ public class TestPostgresStarter {
         ), new AbstractPostgresConfig.Storage("test"), new AbstractPostgresConfig.Timeout(),
                 new AbstractPostgresConfig.Credentials("user", "password"));
         config.getAdditionalInitDbParams().addAll(asList(
-                "-E", "UTF-8",
-                "--locale=en_US.UTF-8",
-                "--lc-collate=en_US.UTF-8",
-                "--lc-ctype=en_US.UTF-8"
+                "-E", "SQL_ASCII",
+                "--locale=C",
+                "--lc-collate=C",
+                "--lc-ctype=C"
         ));
 
         PostgresExecutable exec = runtime.prepare(config);
