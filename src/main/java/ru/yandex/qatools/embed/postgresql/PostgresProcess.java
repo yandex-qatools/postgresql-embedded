@@ -33,6 +33,7 @@ import java.util.logging.Logger;
 
 import static de.flapdoodle.embed.process.io.file.Files.forceDelete;
 import static java.lang.String.format;
+import static java.lang.System.currentTimeMillis;
 import static java.lang.Thread.sleep;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
@@ -124,7 +125,7 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
 
     private static boolean shutdownPostgres(PostgresConfig config, IRuntimeConfig runtimeConfig) {
         try {
-            return isEmpty(runCmd(config, runtimeConfig, Command.PgCtl, "server stopped", 1000, "stop"));
+            return isEmpty(runCmd(config, runtimeConfig, Command.PgCtl, "server stopped", 2000, "stop"));
         } catch (Exception e) {
             logger.log(Level.WARNING, "Failed to stop postgres by pg_ctl!");
         }
@@ -137,21 +138,30 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
             if (!stopped) {
                 stopped = true;
                 logger.info("trying to stop postgresql");
-                if (!sendStopToPostgresqlInstance()) {
-                    logger.warning("could not stop postgresql with command, try next");
-                    if (!sendKillToProcess()) {
-                        logger.warning("could not stop postgresql, try next");
-                        if (!sendTermToProcess()) {
-                            logger.warning("could not stop postgresql, try next");
-                            if (!tryKillToProcess()) {
-                                logger.warning("could not stop postgresql the second time, try one last thing");
-                            }
-                        }
+                if (!sendStopToPostgresqlInstance() && !sendTermToProcess() && waitUntilProcessHasStopped(2000)) {
+                    logger.warning("could not stop postgresql with pg_ctl/SIGTERM, trying to kill it...");
+                    if (!sendKillToProcess() && !tryKillToProcess() && waitUntilProcessHasStopped(3000)) {
+                        logger.warning("could not kill postgresql within 4s!");
                     }
                 }
             }
+            if (!waitUntilProcessHasStopped(5000)) {
+                logger.severe("Postgres has not been stopped within 10s! Something's wrong!");
+            }
             deleteTempFiles();
         }
+    }
+
+    private boolean waitUntilProcessHasStopped(int timeoutMillis) {
+        long started = currentTimeMillis();
+        while (currentTimeMillis() - started < timeoutMillis && isProcessRunning()) {
+            try {
+                sleep(50);
+            } catch (InterruptedException e) {
+                logger.warning("Failed to wait with timeout until the process has been killed");
+            }
+        }
+        return isProcessRunning();
     }
 
     protected final boolean sendStopToPostgresqlInstance() {
