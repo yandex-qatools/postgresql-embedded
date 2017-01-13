@@ -23,6 +23,7 @@ package ru.yandex.qatools.embed.postgresql;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.config.io.ProcessOutput;
 import de.flapdoodle.embed.process.distribution.Distribution;
+import de.flapdoodle.embed.process.distribution.Platform;
 import de.flapdoodle.embed.process.extract.IExtractedFileSet;
 import de.flapdoodle.embed.process.io.LogWatchStreamProcessor;
 import de.flapdoodle.embed.process.io.Processors;
@@ -66,8 +67,13 @@ class InitDbProcess<E extends InitDbExecutable> extends AbstractPGProcess<E, Ini
                     "--pwfile=" + pwFile.getAbsolutePath()
             ));
         }
+        if (distribution.getPlatform() == Platform.Windows) {
+            ret.addAll(config.getAdditionalInitDbParams());
+        }
         ret.add(config.storage().dbDir().getAbsolutePath());
-        ret.addAll(config.getAdditionalInitDbParams());
+        if (distribution.getPlatform() != Platform.Windows) {
+            ret.addAll(config.getAdditionalInitDbParams());
+        }
         return ret;
     }
 
