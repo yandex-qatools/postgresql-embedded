@@ -36,16 +36,16 @@ public abstract class AbstractPostgresConfig<C extends AbstractPostgresConfig> e
         this(config, Command.Postgres);
     }
 
-    public AbstractPostgresConfig(IVersion version, Net networt, Storage storage, Timeout timeout, Credentials cred, SupportConfig supportConfig) {
+    public AbstractPostgresConfig(IVersion version, Net network, Storage storage, Timeout timeout, Credentials cred, SupportConfig supportConfig) {
         super(version, supportConfig);
-        this.network = networt;
+        this.network = network;
         this.timeout = timeout;
         this.storage = storage;
         this.credentials = cred;
     }
 
-    public AbstractPostgresConfig(IVersion version, Net networt, Storage storage, Timeout timeout) {
-        this(version, networt, storage, timeout, null, new SupportConfig(Command.Postgres));
+    public AbstractPostgresConfig(IVersion version, Net network, Storage storage, Timeout timeout) {
+        this(version, network, storage, timeout, null, new SupportConfig(Command.Postgres));
     }
 
     public Net net() {
