@@ -1,0 +1,18 @@
+build:
+  image: teaci/cygwin32
+  shell: cygwin32
+  pull: true
+  commands:
+    - cmd /c c:/cygwin-installer.exe --site http://mirrors.tea-ci.org/cygwin --local-package-dir Z:/tmp/cygwin -W -P cabextract,unzip -q
+    - echo '' > run.bat
+    - wget http://repo.apache.maven.org/maven2/org/apache/maven/apache-maven/3.3.9/apache-maven-3.3.9-bin.zip
+    - unzip apache-maven-3.3.9-bin.zip
+    - wget '--header' 'Cookie:oraclelicense=accept-securebackup-cookie' '--no-cookies' '--no-check-certificate' "http://download.oracle.com/otn-pub/java/jdk/8u91-b15/jdk-8u91-windows-i586.exe"
+    - chmod ogu+rwx jdk-8u91-windows-i586.exe
+    - cabextract jdk-8u91-windows-i586.exe || echo "ignoring errors"
+    - mkdir jdk && mv tools.zip jdk && cd jdk && unzip tools.zip && for i in jre/lib/charsets jre/lib/deploy jre/lib/ext/localedata jre/lib/javaws jre/lib/jsse jre/lib/plugin jre/lib/rt lib/tools; do ./bin/unpack200 -r -v -l "" $i.pack $i.jar; done && cd -
+    - echo set JAVA_HOME=$(cygpath.exe --windows $PWD/jdk) > run.bat
+    - echo set M2_HOME=$(cygpath.exe --windows $PWD/apache-maven-3.3.9) >> run.bat
+    - echo 'set Path=%JAVA_HOME%\bin;%M2_HOME%\bin;%Path%' >> run.bat
+    - echo '%JAVA_HOME%\bin\java -cp %M2_HOME%\boot\plexus-classworlds-2.5.2.jar -Dclassworlds.conf=%M2_HOME%/bin/m2.conf -Dmaven.home=%M2_HOME% -Dmaven.multiModuleProjectDirectory=. org.codehaus.plexus.classworlds.launcher.Launcher clean install' >> run.bat
+    - cmd /c run.bat
