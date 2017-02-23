@@ -45,6 +45,7 @@ import static ru.yandex.qatools.embed.postgresql.Command.CreateDb;
 import static ru.yandex.qatools.embed.postgresql.Command.InitDb;
 import static ru.yandex.qatools.embed.postgresql.Command.PgDump;
 import static ru.yandex.qatools.embed.postgresql.Command.Psql;
+import static ru.yandex.qatools.embed.postgresql.Command.PgRestore;
 import static ru.yandex.qatools.embed.postgresql.PostgresStarter.getCommand;
 import static ru.yandex.qatools.embed.postgresql.config.AbstractPostgresConfig.Storage;
 import static ru.yandex.qatools.embed.postgresql.util.ReflectUtil.setFinalField;
@@ -284,6 +285,27 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
                 args = ArrayUtils.addAll(args, cliArgs);
             }
             runCmd(getConfig(), runtimeConfig, Psql, "", new HashSet<>(singletonList("import into " + getConfig().storage().dbName() + " failed")), 1000, args);
+        }
+    }
+
+    /**
+     * Import into database from file with additional args
+     *
+     * @param file
+     * @param cliArgs additional arguments for psql (be sure to separate args from their values)
+     */
+    public void restoreFromFile(File file, String... cliArgs) {
+        if (file.exists()) {
+            String[] args = {
+                    "-U", getConfig().credentials().username(),
+                    "-d", getConfig().storage().dbName(),
+                    "-h", getConfig().net().host(),
+                    "-p", String.valueOf(getConfig().net().port()),
+                    file.getAbsolutePath()};
+            if (cliArgs != null && cliArgs.length != 0) {
+                args = ArrayUtils.addAll(args, cliArgs);
+            }
+            runCmd(getConfig(), runtimeConfig, PgRestore, "", new HashSet<>(singletonList("restore into " + getConfig().storage().dbName() + " failed")), 1000, args);
         }
     }
 
