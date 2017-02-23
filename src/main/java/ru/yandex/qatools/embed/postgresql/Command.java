@@ -9,6 +9,7 @@ public enum Command {
     PgCtl("pg_ctl", PgCtlExecutable.class),
     Psql("psql", PsqlExecutable.class),
     PgDump("pg_dump", PsqlExecutable.class),
+    PgRestore("pg_restore", PsqlExecutable.class),
     Createuser("createuser", PsqlExecutable.class),
     ;
 
