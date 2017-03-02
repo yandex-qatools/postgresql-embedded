@@ -146,7 +146,7 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
                     }
                 }
             }
-            if (!waitUntilProcessHasStopped(5000)) {
+            if (waitUntilProcessHasStopped(5000)) {
                 logger.severe("Postgres has not been stopped within 10s! Something's wrong!");
             }
             deleteTempFiles();
