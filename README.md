@@ -88,18 +88,18 @@ Here is the example of how to launch and use the embedded PostgreSQL instance
 
 You can specify the cached artifact store to avoid archives downloading and extraction (in case if a directory remains on every run)
 ```java
-        final Command cmd = Command.Postgres;
-        // the cached directory should contain pgsql folder
-        final FixedPath cachedDir = new FixedPath("/path/to/my/extracted/postgres");
-        IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder().defaults(cmd)
-                                            .artifactStore(new CachedArtifactStoreBuilder()
-                                                    .defaults(cmd)
-                                                    .tempDir(cachedDir)
-                                                    .download(new DownloadConfigBuilder()
-                                                            .defaultsForCommand(cmd)
-                                                            .packageResolver(new PackagePaths(cmd, cachedDir))
-                                                            .build()))
-                                            .build();
+final Command cmd = Command.Postgres;
+// the cached directory should contain pgsql folder
+final FixedPath cachedDir = new FixedPath("/path/to/my/extracted/postgres");
+IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder().defaults(cmd)
+                                    .artifactStore(new CachedArtifactStoreBuilder()
+                                            .defaults(cmd)
+                                            .tempDir(cachedDir)
+                                            .download(new DownloadConfigBuilder()
+                                                    .defaultsForCommand(cmd)
+                                                    .packageResolver(new PackagePaths(cmd, cachedDir))
+                                                    .build()))
+                                    .build();
 ```
 
 ### How to configure logging
