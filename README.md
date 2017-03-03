@@ -133,6 +133,6 @@ log4j.throwableRenderer=org.apache.log4j.EnhancedThrowableRenderer
 * It is no longer required to set up the LANG environment variable within your system, just pass that config as additionalInitDbParams.
 
 ### Supported Versions
-Versions: 9.5.0, 9.4.4, 9.4.1, 9.3.5, 9.2.4, any custom
+Versions: 9.6.2, 9.5.0, 9.4.4, 9.4.1, 9.3.5, 9.2.4, any custom
 Support for Linux, Windows and MacOSX.
 
