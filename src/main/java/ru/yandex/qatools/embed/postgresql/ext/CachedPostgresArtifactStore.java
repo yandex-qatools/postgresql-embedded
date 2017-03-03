@@ -52,7 +52,7 @@ public class CachedPostgresArtifactStore extends PostgresArtifactStore {
                 iterateFiles(dir, TRUE, TRUE).forEachRemaining(file -> {
                     FileType type = Library;
                     for (Entry entry : filesSet.entries()) {
-                        if (file.getPath().contains(entry.matchingPattern().toString())) {
+                        if (file.getPath().endsWith(entry.matchingPattern().toString())) {
                             type = Executable;
                         }
                     }
