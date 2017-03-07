@@ -122,6 +122,14 @@ log4j.appender.stdout.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1
 log4j.throwableRenderer=org.apache.log4j.EnhancedThrowableRenderer
 ```
 
+### How to use your custom version of PostgreSQL
+
+Pass the required `IVersion` interface implementation as a first argument of the `PostgresConfig` object:
+
+```java
+final PostgresConfig config =  new PostgresConfig(() -> (IS_OS_WINDOWS) ? "9.6.2-2" : "9.6.2-1", ...);
+```
+
 ### Important Notes
 * PostgreSQL server is known to not start under the privileged user (which means you cannot start it under root/Administrator of your system):  
 
