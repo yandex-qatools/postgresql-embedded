@@ -4,7 +4,8 @@ import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.config.io.ProcessOutput;
 import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.extract.IExtractedFileSet;
-import de.flapdoodle.embed.process.io.LoggingOutputStreamProcessor;
+import de.flapdoodle.embed.process.io.Slf4jLevel;
+import de.flapdoodle.embed.process.io.Slf4jStreamProcessor;
 import de.flapdoodle.embed.process.runtime.Starter;
 import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
 import ru.yandex.qatools.embed.postgresql.config.RuntimeConfigBuilder;
@@ -12,10 +13,9 @@ import ru.yandex.qatools.embed.postgresql.ext.LogWatchStreamProcessor;
 
 import java.lang.reflect.Constructor;
 import java.util.HashSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static java.util.Collections.singletonList;
+import static org.slf4j.LoggerFactory.getLogger;
 
 
 /**
@@ -41,7 +41,7 @@ public class PostgresStarter<E extends AbstractPGExecutable<PostgresConfig, P>, 
     public static IRuntimeConfig runtimeConfig(Command cmd) {
         LogWatchStreamProcessor logWatch = new LogWatchStreamProcessor(
                 "started", new HashSet<>(singletonList("failed")),
-                new LoggingOutputStreamProcessor(Logger.getLogger("postgres"), Level.ALL));
+                new Slf4jStreamProcessor(getLogger("postgres"), Slf4jLevel.TRACE));
         return new RuntimeConfigBuilder()
                 .defaults(cmd)
                 .processOutput(new ProcessOutput(logWatch, logWatch, logWatch)).build();

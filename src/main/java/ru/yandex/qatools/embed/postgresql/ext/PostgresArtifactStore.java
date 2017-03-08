@@ -32,7 +32,7 @@ public class PostgresArtifactStore extends ArtifactStore {
         _executableNaming = executableNaming;
     }
 
-    private static File getArtifact(IDownloadConfig runtime, Distribution distribution) {
+    private File getArtifact(IDownloadConfig runtime, Distribution distribution) {
         File dir = createOrGetBaseDir(runtime);
         File artifactFile = new File(dir, runtime.getPackageResolver().getPath(distribution));
         if ((artifactFile.exists()) && (artifactFile.isFile()))
@@ -40,13 +40,13 @@ public class PostgresArtifactStore extends ArtifactStore {
         return null;
     }
 
-    private static File createOrGetBaseDir(IDownloadConfig runtime) {
+    private File createOrGetBaseDir(IDownloadConfig runtime) {
         File dir = runtime.getArtifactStorePath().asFile();
         createOrCheckDir(dir);
         return dir;
     }
 
-    private static void createOrCheckDir(File dir) {
+    private void createOrCheckDir(File dir) {
         if (!dir.exists()) {
             if (!dir.mkdirs())
                 throw new IllegalArgumentException("Could NOT create Directory " + dir);

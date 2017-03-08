@@ -5,19 +5,22 @@ import de.flapdoodle.embed.process.config.io.ProcessOutput;
 import de.flapdoodle.embed.process.config.store.IDownloadConfig;
 import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.extract.IExtractedFileSet;
-import de.flapdoodle.embed.process.io.LoggingOutputStreamProcessor;
+import de.flapdoodle.embed.process.io.Slf4jLevel;
+import de.flapdoodle.embed.process.io.Slf4jStreamProcessor;
 import de.flapdoodle.embed.process.io.directories.IDirectory;
-import de.flapdoodle.embed.process.io.progress.LoggingProgressListener;
+import de.flapdoodle.embed.process.io.progress.Slf4jProgressListener;
 import de.flapdoodle.embed.process.runtime.Executable;
 import de.flapdoodle.embed.process.runtime.ProcessControl;
 import de.flapdoodle.embed.process.store.IArtifactStore;
 import org.apache.commons.lang3.ArrayUtils;
+import org.slf4j.Logger;
 import ru.yandex.qatools.embed.postgresql.config.DownloadConfigBuilder;
 import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
 import ru.yandex.qatools.embed.postgresql.config.RuntimeConfigBuilder;
 import ru.yandex.qatools.embed.postgresql.ext.ArtifactStoreBuilder;
 import ru.yandex.qatools.embed.postgresql.ext.LogWatchStreamProcessor;
 import ru.yandex.qatools.embed.postgresql.ext.PostgresArtifactStore;
+import ru.yandex.qatools.embed.postgresql.ext.SubdirTempDir;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,24 +31,21 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static de.flapdoodle.embed.process.io.file.Files.forceDelete;
-import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static java.lang.Thread.sleep;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
-import static java.util.logging.Logger.getLogger;
 import static org.apache.commons.io.FileUtils.readLines;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.slf4j.LoggerFactory.getLogger;
 import static ru.yandex.qatools.embed.postgresql.Command.CreateDb;
 import static ru.yandex.qatools.embed.postgresql.Command.InitDb;
 import static ru.yandex.qatools.embed.postgresql.Command.PgDump;
-import static ru.yandex.qatools.embed.postgresql.Command.Psql;
 import static ru.yandex.qatools.embed.postgresql.Command.PgRestore;
+import static ru.yandex.qatools.embed.postgresql.Command.Psql;
 import static ru.yandex.qatools.embed.postgresql.PostgresStarter.getCommand;
 import static ru.yandex.qatools.embed.postgresql.config.AbstractPostgresConfig.Storage;
 import static ru.yandex.qatools.embed.postgresql.util.ReflectUtil.setFinalField;
@@ -55,7 +55,7 @@ import static ru.yandex.qatools.embed.postgresql.util.ReflectUtil.setFinalField;
  */
 public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, PostgresProcess> {
     public static final int MAX_CREATEDB_TRIALS = 3;
-    private static Logger logger = getLogger(PostgresProcess.class.getName());
+    private static Logger LOGGER = getLogger(PostgresProcess.class);
     private final IRuntimeConfig runtimeConfig;
 
     volatile boolean processReady = false;
@@ -84,21 +84,25 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
             PostgresConfig config, IRuntimeConfig runtimeConfig, Command cmd, String successOutput, Set<String> failOutput, long timeout, String... args) {
         try {
             LogWatchStreamProcessor logWatch = new LogWatchStreamProcessor(successOutput,
-                    failOutput, new LoggingOutputStreamProcessor(logger, Level.ALL));
+                    failOutput, new Slf4jStreamProcessor(LOGGER, Slf4jLevel.TRACE));
 
             IArtifactStore artifactStore = runtimeConfig.getArtifactStore();
             IDownloadConfig downloadCfg = ((PostgresArtifactStore) artifactStore).getDownloadConfig();
 
             // TODO: very hacky and unreliable way to respect the parent command's configuration
             try { //NOSONAR
-                setFinalField(downloadCfg, "_packageResolver", new PackagePaths(cmd));
+                IDirectory tempDir = SubdirTempDir.defaultInstance();
+                if (downloadCfg.getPackageResolver() instanceof PackagePaths) {
+                    tempDir = ((PackagePaths) downloadCfg.getPackageResolver()).getTempDir();
+                }
+                setFinalField(downloadCfg, "_packageResolver", new PackagePaths(cmd, tempDir));
                 setFinalField(artifactStore, "_downloadConfig", downloadCfg);
             } catch (Exception e) {
                 // fallback to the default config
-                logger.log(Level.SEVERE, "Could not use the configured artifact store for cmd, " +
+                LOGGER.error("Could not use the configured artifact store for cmd, " +
                         "falling back to default " + cmd, e);
                 downloadCfg = new DownloadConfigBuilder().defaultsForCommand(cmd)
-                        .progressListener(new LoggingProgressListener(logger, Level.ALL)).build();
+                        .progressListener(new Slf4jProgressListener(LOGGER)).build();
                 artifactStore = new ArtifactStoreBuilder().defaults(cmd).download(downloadCfg).build();
             }
 
@@ -119,7 +123,7 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
             proc.waitFor();
             return logWatch.getOutput();
         } catch (IOException | InterruptedException e) {
-            logger.log(Level.WARNING, e.getMessage());
+            LOGGER.warn("Failed to run command {}", cmd.commandName(), e);
         }
         return null;
     }
@@ -128,7 +132,7 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
         try {
             return isEmpty(runCmd(config, runtimeConfig, Command.PgCtl, "server stopped", 2000, "stop"));
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Failed to stop postgres by pg_ctl!");
+            LOGGER.warn("Failed to stop postgres by pg_ctl!", e);
         }
         return false;
     }
@@ -138,16 +142,16 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
         synchronized (this) {
             if (!stopped) {
                 stopped = true;
-                logger.info("trying to stop postgresql");
+                LOGGER.info("trying to stop postgresql");
                 if (!sendStopToPostgresqlInstance() && !sendTermToProcess() && waitUntilProcessHasStopped(2000)) {
-                    logger.warning("could not stop postgresql with pg_ctl/SIGTERM, trying to kill it...");
+                    LOGGER.warn("could not stop postgresql with pg_ctl/SIGTERM, trying to kill it...");
                     if (!sendKillToProcess() && !tryKillToProcess() && waitUntilProcessHasStopped(3000)) {
-                        logger.warning("could not kill postgresql within 4s!");
+                        LOGGER.warn("could not kill postgresql within 4s!");
                     }
                 }
             }
             if (waitUntilProcessHasStopped(5000)) {
-                logger.severe("Postgres has not been stopped within 10s! Something's wrong!");
+                LOGGER.error("Postgres has not been stopped within 10s! Something's wrong!");
             }
             deleteTempFiles();
         }
@@ -159,7 +163,7 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
             try {
                 sleep(50);
             } catch (InterruptedException e) {
-                logger.warning("Failed to wait with timeout until the process has been killed");
+                LOGGER.warn("Failed to wait with timeout until the process has been killed", e);
             }
         }
         return isProcessRunning();
@@ -169,9 +173,8 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
         final boolean result = shutdownPostgres(getConfig(), runtimeConfig);
         if (runtimeConfig.getArtifactStore() instanceof PostgresArtifactStore) {
             final IDirectory tempDir = ((PostgresArtifactStore) runtimeConfig.getArtifactStore()).getTempDir();
-            if (tempDir != null && tempDir.asFile() != null) {
-                logger.log(Level.INFO, format("Cleaning up after the embedded process (removing %s)...",
-                        tempDir.asFile().getAbsolutePath()));
+            if (tempDir != null && tempDir.asFile() != null && tempDir.isGenerated()) {
+                LOGGER.info("Cleaning up after the embedded process (removing {})...", tempDir.asFile().getAbsolutePath());
                 forceDelete(tempDir.asFile());
             }
         }
@@ -216,7 +219,7 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
     protected void deleteTempFiles() {
         final Storage storage = getConfig().storage();
         if ((storage.dbDir() != null) && (storage.isTmpDir()) && (!forceDelete(storage.dbDir()))) {
-            logger.warning("Could not delete temp db dir: " + storage.dbDir());
+            LOGGER.warn("Could not delete temp db dir: {}", storage.dbDir());
         }
     }
 
@@ -235,7 +238,7 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
         try {
             pid = Integer.valueOf(readLines(pidFilePath.toFile()).get(0));
         } catch (Exception e) {
-            logger.log(Level.SEVERE, format("Failed to read PID file (%s)", e.getMessage()));
+            LOGGER.error("Failed to read PID file ({})", e.getMessage(), e);
         }
         if (pid != -1) {
             setProcessId(pid);
@@ -251,8 +254,7 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
                 if (isEmpty(output) || !output.contains("could not connect to database")) {
                     break;
                 }
-                logger.log(Level.WARNING,
-                        format("Could not create database first time (%s of %s trials)", trial, MAX_CREATEDB_TRIALS));
+                LOGGER.warn("Could not create database first time ({} of {} trials)", trial, MAX_CREATEDB_TRIALS);
                 sleep(100);
             } catch (InterruptedException ie) { /* safe to ignore */ }
         } while (trial++ < MAX_CREATEDB_TRIALS);

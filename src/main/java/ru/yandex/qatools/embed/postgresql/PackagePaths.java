@@ -6,21 +6,23 @@ import de.flapdoodle.embed.process.config.store.IPackageResolver;
 import de.flapdoodle.embed.process.distribution.ArchiveType;
 import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.distribution.IVersion;
-import ru.yandex.qatools.embed.postgresql.ext.SubdirTempDir;
-
-import java.io.File;
-import java.util.logging.Logger;
+import de.flapdoodle.embed.process.io.directories.IDirectory;
 
 /**
  * Paths builder
  */
 public class PackagePaths implements IPackageResolver {
 
-    protected static Logger logger = Logger.getLogger(PackagePaths.class.getName());
     private final Command command;
+    private final IDirectory tempDir;
 
-    public PackagePaths(Command command) {
+    public PackagePaths(Command command, IDirectory tempDir) {
         this.command = command;
+        this.tempDir = tempDir;
+    }
+
+    public IDirectory getTempDir() {
+        return tempDir;
     }
 
     @Override
@@ -39,9 +41,8 @@ public class PackagePaths implements IPackageResolver {
                         + distribution.getPlatform());
         }
         try {
-            File tmpDir = SubdirTempDir.defaultInstance().asFile();
             return FileSet.builder()
-                    .addEntry(FileType.Executable, tmpDir.getPath(), "pgsql/bin/" + cmdPattern)
+                    .addEntry(FileType.Executable, tempDir.asFile().getPath(), "pgsql/bin/" + cmdPattern)
                     .build();
         } catch (Exception e) {
             throw new RuntimeException(e);

@@ -21,14 +21,14 @@ Add the following dependency to your pom.xml:
     <dependency>
         <groupId>ru.yandex.qatools.embed</groupId>
         <artifactId>postgresql-embedded</artifactId>
-        <version>1.20</version>
+        <version>1.22</version>
     </dependency>
 ```
 ### Gradle
 
 Add a line to build.gradle:
 ```groovy
-    compile 'ru.yandex.qatools.embed:postgresql-embedded:1.20'
+    compile 'ru.yandex.qatools.embed:postgresql-embedded:1.22'
 ```
 
 ## Howto
@@ -84,6 +84,52 @@ Here is the example of how to launch and use the embedded PostgreSQL instance
     process.stop();
 ```
 
+### How to use avoid archive extraction on every run
+
+You can specify the cached artifact store to avoid archives downloading and extraction (in case if a directory remains on every run)
+```java
+final Command cmd = Command.Postgres;
+// the cached directory should contain pgsql folder
+final FixedPath cachedDir = new FixedPath("/path/to/my/extracted/postgres");
+IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder().defaults(cmd)
+                                    .artifactStore(new CachedArtifactStoreBuilder()
+                                            .defaults(cmd)
+                                            .tempDir(cachedDir)
+                                            .download(new DownloadConfigBuilder()
+                                                    .defaultsForCommand(cmd)
+                                                    .packageResolver(new PackagePaths(cmd, cachedDir))
+                                                    .build()))
+                                    .build();
+```
+
+### How to configure logging
+
+Just configure your own `slf4j` appenders. Here is the example of typical `src/test/resources/log4j.properties` file:
+
+```java
+# suppress inspection "UnusedProperty" for whole file
+log4j.rootLogger=DEBUG, stdout
+
+# reduce logging for postgresql-embedded
+log4j.logger.ru.yandex.qatools.embed=INFO
+log4j.logger.de.flapdoodle.embed=INFO
+
+# Direct log messages to stdout
+log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+log4j.appender.stdout.Target=System.out
+log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+log4j.appender.stdout.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
+log4j.throwableRenderer=org.apache.log4j.EnhancedThrowableRenderer
+```
+
+### How to use your custom version of PostgreSQL
+
+Pass the required `IVersion` interface implementation as a first argument of the `PostgresConfig` object:
+
+```java
+final PostgresConfig config =  new PostgresConfig(() -> (IS_OS_WINDOWS) ? "9.6.2-2" : "9.6.2-1", ...);
+```
+
 ### Important Notes
 * PostgreSQL server is known to not start under the privileged user (which means you cannot start it under root/Administrator of your system):  
 
@@ -95,6 +141,6 @@ Here is the example of how to launch and use the embedded PostgreSQL instance
 * It is no longer required to set up the LANG environment variable within your system, just pass that config as additionalInitDbParams.
 
 ### Supported Versions
-Versions: 9.5.0, 9.4.4, 9.4.1, 9.3.5, 9.2.4, any custom
+Versions: 9.6.2, 9.5.0, 9.4.4, 9.4.1, 9.3.5, 9.2.4, any custom
 Support for Linux, Windows and MacOSX.
 

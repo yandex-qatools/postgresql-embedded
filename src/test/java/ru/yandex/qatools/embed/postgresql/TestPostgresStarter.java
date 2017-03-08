@@ -34,7 +34,7 @@ public class TestPostgresStarter {
 
     private static final Logger logger = Logger.getLogger(TestPostgresStarter.class.getName());
     private final TestHandler testHandler = new TestHandler();
-    private PostgresProcess process;
+    protected PostgresProcess process;
     private Connection conn;
 
     @Before
@@ -42,16 +42,7 @@ public class TestPostgresStarter {
         logger.setLevel(Level.INFO);
         logger.addHandler(testHandler);
         // turns off the default functionality of unzipping on every run.
-        IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder()
-                .defaults(Command.Postgres)
-                .artifactStore(new ArtifactStoreBuilder()
-                        .defaults(Command.Postgres)
-                        .download(new DownloadConfigBuilder()
-                                .defaultsForCommand(Command.Postgres)
-                                .progressListener(new LoggingProgressListener(logger, Level.ALL))
-                                .build()))
-
-                .build();
+        IRuntimeConfig runtimeConfig = buildRuntimeConfig();
 
         PostgresStarter<PostgresExecutable, PostgresProcess> runtime = PostgresStarter.getInstance(runtimeConfig);
         final PostgresConfig config = new PostgresConfig(PRODUCTION, new AbstractPostgresConfig.Net(
@@ -75,6 +66,19 @@ public class TestPostgresStarter {
                 config.credentials().password()
         );
         conn = DriverManager.getConnection(url);
+    }
+
+    protected IRuntimeConfig buildRuntimeConfig() {
+        return new RuntimeConfigBuilder()
+                .defaults(Command.Postgres)
+                .artifactStore(new ArtifactStoreBuilder()
+                        .defaults(Command.Postgres)
+                        .download(new DownloadConfigBuilder()
+                                .defaultsForCommand(Command.Postgres)
+                                .progressListener(new LoggingProgressListener(logger, Level.ALL))
+                                .build()))
+
+                .build();
     }
 
     @After
