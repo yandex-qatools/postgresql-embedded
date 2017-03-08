@@ -15,12 +15,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import static de.flapdoodle.embed.process.config.store.FileType.Executable;
 import static de.flapdoodle.embed.process.config.store.FileType.Library;
 import static de.flapdoodle.embed.process.extract.ImmutableExtractedFileSet.builder;
+import static java.nio.file.Files.exists;
+import static java.nio.file.Paths.get;
 import static org.apache.commons.io.FileUtils.iterateFiles;
 import static org.apache.commons.io.filefilter.TrueFileFilter.TRUE;
 
@@ -47,12 +47,12 @@ public class CachedPostgresArtifactStore extends PostgresArtifactStore {
             final File dir = this.eDir.asFile();
             final FileSet filesSet = downloadConfig.getPackageResolver().getFileSet(distribution);
             if (dir.exists() && dir.isDirectory() && filesSet.entries().stream()
-                    .allMatch(entry -> Files.exists(Paths.get(dir.getPath(), entry.matchingPattern().toString())))) {
+                    .allMatch(entry -> exists(get(dir.getPath(), "pgsql", "bin")))) {
                 final Builder extracted = builder(dir).baseDirIsGenerated(false);
                 iterateFiles(dir, TRUE, TRUE).forEachRemaining(file -> {
                     FileType type = Library;
                     for (Entry entry : filesSet.entries()) {
-                        if (file.getPath().endsWith(entry.matchingPattern().toString())) {
+                        if (entry.matchingPattern().matcher(file.getPath()).matches()) {
                             type = Executable;
                         }
                     }
