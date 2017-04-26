@@ -8,6 +8,8 @@ import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.distribution.IVersion;
 import de.flapdoodle.embed.process.io.directories.IDirectory;
 
+import java.nio.file.Paths;
+
 /**
  * Paths builder
  */
@@ -19,6 +21,10 @@ public class PackagePaths implements IPackageResolver {
     public PackagePaths(Command command, IDirectory tempDir) {
         this.command = command;
         this.tempDir = tempDir;
+    }
+
+    protected static String getVersionPart(IVersion version) {
+        return version.asInDownloadPath();
     }
 
     public IDirectory getTempDir() {
@@ -42,7 +48,9 @@ public class PackagePaths implements IPackageResolver {
         }
         try {
             return FileSet.builder()
-                    .addEntry(FileType.Executable, tempDir.asFile().getPath(), "pgsql/bin/" + cmdPattern)
+                    .addEntry(FileType.Executable, tempDir.asFile().getPath(),
+                            "^.*" + Paths.get("pgsql", "bin", cmdPattern)
+                                    .toString().replace("\\", "\\\\") + "$")
                     .build();
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -134,9 +142,5 @@ public class PackagePaths implements IPackageResolver {
         }
 
         return "postgresql-" + sversion + "-" + splatform + bitsize + "-binaries" + "." + sarchiveType;
-    }
-
-    protected static String getVersionPart(IVersion version) {
-        return version.asInDownloadPath();
     }
 }
