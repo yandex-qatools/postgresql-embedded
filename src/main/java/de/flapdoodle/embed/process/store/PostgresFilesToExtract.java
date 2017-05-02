@@ -39,7 +39,7 @@ public class PostgresFilesToExtract extends FilesToExtract {
 
     /**
      * This is actually the very dirty hack method to adopt the Flapdoodle's API to the compatible way to extract and run
-     * TODO: very very hacky method!
+     * TODO: hacky method. Should be considered for complete rewriting //NOSONAR
      */
     @Override
     public IExtractionMatch find(final IArchiveEntry entry) {//NOSONAR
@@ -55,7 +55,7 @@ public class PostgresFilesToExtract extends FilesToExtract {
                         archiveEntryField.setAccessible(true);
                         ArchiveEntry archiveEntry = (ArchiveEntry) archiveEntryField.get(entry);
                         if (archiveEntry instanceof TarArchiveEntry
-                                && (isSymLink = ((TarArchiveEntry) archiveEntry).isSymbolicLink())) {
+                                && (isSymLink = ((TarArchiveEntry) archiveEntry).isSymbolicLink())) { //NOSONAR
                             linkName = ((TarArchiveEntry) archiveEntry).getLinkName();
                         }
                         archiveEntry.getSize();
