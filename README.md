@@ -19,7 +19,7 @@ Add the following dependency to your pom.xml:
 <dependency>
     <groupId>ru.yandex.qatools.embed</groupId>
     <artifactId>postgresql-embedded</artifactId>
-       <version>2.0</version>
+    <version>2.0</version>
 </dependency>
 ```
 ### Gradle
@@ -65,8 +65,8 @@ postgres.stop();
 
 You can specify the cached artifact store to avoid archives downloading and extraction (in case if a directory remains on every run).
 ```java
-    final EmbeddedPostgres postgres = new EmbeddedPostgres();
-    postgres.start(cachedRuntimeConfig("/path/to/my/extracted/postgres"));
+final EmbeddedPostgres postgres = new EmbeddedPostgres();
+postgres.start(cachedRuntimeConfig("/path/to/my/extracted/postgres"));
 ```
 
 ### How to configure logging
@@ -91,7 +91,7 @@ log4j.throwableRenderer=org.apache.log4j.EnhancedThrowableRenderer
 
 ### How to use your custom version of PostgreSQL
 
-Pass the required `IVersion` interface implementation as a first argument of the `PostgresConfig` object:
+Pass the required `IVersion` interface implementation as a first argument of the `EmbeddedPostgres` object:
 
 ```java
 final EmbeddedPostgres postgres = new EmbeddedPostgres(() -> (IS_OS_WINDOWS) ? "9.6.2-2" : "9.6.2-1");
@@ -108,6 +108,8 @@ final EmbeddedPostgres postgres = new EmbeddedPostgres(() -> (IS_OS_WINDOWS) ? "
 * It is no longer required to set up the LANG environment variable within your system, just pass that config as additionalInitDbParams.
 
 ### Supported Versions
+
 Versions: 9.6.2, 9.5.5, 9.4.10, any custom
+
 Platforms: Linux, Windows and MacOSX supported
 
