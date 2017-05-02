@@ -1,7 +1,6 @@
 package de.flapdoodle.embed.process.store;
 
 import de.flapdoodle.embed.process.config.store.FileSet;
-import de.flapdoodle.embed.process.config.store.FileSet.Entry;
 import de.flapdoodle.embed.process.config.store.FileType;
 import de.flapdoodle.embed.process.config.store.IDownloadConfig;
 import de.flapdoodle.embed.process.distribution.Distribution;
@@ -50,10 +49,9 @@ public class CachedPostgresArtifactStore extends PostgresArtifactStore {
                 final Builder extracted = builder(dir).baseDirIsGenerated(false);
                 iterateFiles(dir, TRUE, TRUE).forEachRemaining(file -> {
                     FileType type = Library;
-                    for (Entry entry : filesSet.entries()) {
-                        if (entry.matchingPattern().matcher(file.getPath()).matches()) {
-                            type = Executable;
-                        }
+                    if (filesSet.entries().stream()
+                            .anyMatch(entry -> entry.matchingPattern().matcher(file.getPath()).matches())) {
+                        type = Executable;
                     }
                     extracted.file(type, file);
                 });
