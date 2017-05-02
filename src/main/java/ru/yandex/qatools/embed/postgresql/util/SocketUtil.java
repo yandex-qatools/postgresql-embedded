@@ -1,9 +1,18 @@
 package ru.yandex.qatools.embed.postgresql.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 
-public abstract class SocketUtil {
+public final class SocketUtil {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SocketUtil.class);
+
+    private SocketUtil() {
+    }
+
+
     /**
      * Returns a free port number on localhost.
      * <p/>
@@ -19,23 +28,23 @@ public abstract class SocketUtil {
             socket = new ServerSocket(0);
             socket.setReuseAddress(true);
             int port = socket.getLocalPort();
-            try {
-                socket.close();
-            } catch (IOException ignored) {
-                // Ignore IOException on close()
-            }
+            closeQuietly(socket);
             return port;
-        } catch (IOException ignored) {
-            // Ignore IOException on open
+        } catch (IOException e) {
+            LOGGER.trace("Failed to open socket", e);
         } finally {
             if (socket != null) {
-                try {
-                    socket.close();
-                } catch (IOException ignored) {
-                    // Ignore IOException on close()
-                }
+                closeQuietly(socket);
             }
         }
         throw new IllegalStateException("Could not find a free TCP/IP port to start embedded Jetty HTTP Server on");
+    }
+
+    private static void closeQuietly(ServerSocket socket) {
+        try {
+            socket.close();
+        } catch (IOException e) {
+            LOGGER.trace("Failed to close socket", e);
+        }
     }
 }

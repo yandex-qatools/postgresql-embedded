@@ -11,6 +11,8 @@ import de.flapdoodle.embed.process.io.directories.IDirectory;
 import de.flapdoodle.embed.process.io.file.Files;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,6 +27,7 @@ import java.nio.file.Paths;
  *         Hacky strategy of extraction. Allows to extract the full postgres binaries.
  */
 public class PostgresFilesToExtract extends FilesToExtract {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PostgresFilesToExtract.class);
     final FileSet fileSet;
     final IDirectory extractDir;
 
@@ -76,11 +79,11 @@ public class PostgresFilesToExtract extends FilesToExtract {
                     } else {
                         if (!outputFile.exists()) { // prevent double extraction (for other binaries)
                             if (isSymLink) {
-                                try {
+                                try { // NOSONAR
                                     final Path target = outputFile.toPath().getParent().resolve(Paths.get(linkName));
                                     java.nio.file.Files.createSymbolicLink(outputFile.toPath(), target);
-                                } catch (Exception ignored) {
-                                    // do nothing
+                                } catch (Exception e) {
+                                    LOGGER.trace("Failed to extract symlink", e);
                                 }
                             } else {
                                 Files.write(source, outputFile);
