@@ -6,8 +6,6 @@
 Embedded PostgreSQL server provides a platform neutral way for running postgres binaries in unittests.
 This library is based on [Flapdoodle OSS's embed process](https://github.com/flapdoodle-oss/de.flapdoodle.embed.process). 
 
-Please consider using the [embedded-services](https://github.com/yandex-qatools/embedded-services) project as well.
-
 ## Motivation
 
 * It's much easier than installing specific version manually
@@ -18,88 +16,57 @@ Please consider using the [embedded-services](https://github.com/yandex-qatools/
 
 Add the following dependency to your pom.xml:
 ```xml
-    <dependency>
-        <groupId>ru.yandex.qatools.embed</groupId>
-        <artifactId>postgresql-embedded</artifactId>
-        <version>1.23</version>
-    </dependency>
+<dependency>
+    <groupId>ru.yandex.qatools.embed</groupId>
+    <artifactId>postgresql-embedded</artifactId>
+    <version>2.0</version>
+</dependency>
 ```
 ### Gradle
 
 Add a line to build.gradle:
 ```groovy
-    compile 'ru.yandex.qatools.embed:postgresql-embedded:1.23'
+compile 'ru.yandex.qatools.embed:postgresql-embedded:2.0'
 ```
 
 ## Howto
 
 Here is the example of how to launch and use the embedded PostgreSQL instance
 ```java
-    // define of retrieve db name and credentials
-    final String name = "yourDbname";
-    final String username = "yourUser";
-    final String password = "youPassword";
+// starting Postgres
+final EmbeddedPostgres postgres = new EmbeddedPostgres(V9_6);
+final String url = postgres.start("localhost", 5432, "dbName", "userName", "password");
 
-    // starting Postgres
-    final PostgresStarter<PostgresExecutable, PostgresProcess> runtime = PostgresStarter.getDefaultInstance();
-    final PostgresConfig config = PostgresConfig.defaultWithDbName(name, username, password);
-    // pass info regarding encoding, locale, collate, ctype, instead of setting global environment settings
-    config.getAdditionalInitDbParams().addAll(asList(
-        "-E", "UTF-8",
-        "--locale=en_US.UTF-8",
-        "--lc-collate=en_US.UTF-8",
-        "--lc-ctype=en_US.UTF-8"
-    ));
-    PostgresExecutable exec = runtime.prepare(config);
-    PostgresProcess process = exec.start();
-    
-    // connecting to a running Postgres
-    String url = format("jdbc:postgresql://%s:%s/%s?currentSchema=public&user=%s&password=%s",
-            config.net().host(),
-            config.net().port(),
-            config.storage().dbName(),
-            config.credentials().username(),
-            config.credentials().password()
-    );
-    Connection conn = DriverManager.getConnection(url);
-    
-    // feeding up the database
-    conn.createStatement().execute("CREATE TABLE films (code char(5));");
-    conn.createStatement().execute("INSERT INTO films VALUES ('movie');");
+// connecting to a running Postgres and feeding up the database
+final Connection conn = DriverManager.getConnection(url);
+conn.createStatement().execute("CREATE TABLE films (code char(5));");
+conn.createStatement().execute("INSERT INTO films VALUES ('movie');");
 
-    // ... or you can execute SQL files...
-    //pgProcess.importFromFile(new File("someFile.sql"))
-    // ... or even SQL files with PSQL variables in them...
-    //pgProcess.importFromFileWithArgs(new File("someFile.sql"), "-v", "tblName=someTable")
-    
-    // performing some assertions
-    final Statement statement = conn.createStatement();
-    assertThat(statement.execute("SELECT * FROM films;"), is(true));
-    assertThat(statement.getResultSet().next(), is(true));
+// ... or you can execute SQL files...
+//postgres.getProcess().importFromFile(new File("someFile.sql"))
+// ... or even SQL files with PSQL variables in them...
+//postgres.getProcess().importFromFileWithArgs(new File("someFile.sql"), "-v", "tblName=someTable")
+// ... or even restore database from dump file
+//postgres.getProcess().restoreFromFile(new File("src/test/resources/test.binary_dump"))
 
-    // close db connection
-    conn.close();
+// performing some assertions
+final Statement statement = conn.createStatement();
+assertThat(statement.execute("SELECT * FROM films;"), is(true));
+assertThat(statement.getResultSet().next(), is(true));
+assertThat(statement.getResultSet().getString("code"), is("movie"));
 
-    // stop Postgres
-    process.stop();
+// close db connection
+conn.close();
+// stop Postgres
+postgres.stop();
 ```
 
 ### How to avoid archive extraction on every run
 
-You can specify the cached artifact store to avoid archives downloading and extraction (in case if a directory remains on every run)
+You can specify the cached artifact store to avoid archives downloading and extraction (in case if a directory remains on every run).
 ```java
-final Command cmd = Command.Postgres;
-// the cached directory should contain pgsql folder
-final FixedPath cachedDir = new FixedPath("/path/to/my/extracted/postgres");
-IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder().defaults(cmd)
-                                    .artifactStore(new CachedArtifactStoreBuilder()
-                                            .defaults(cmd)
-                                            .tempDir(cachedDir)
-                                            .download(new DownloadConfigBuilder()
-                                                    .defaultsForCommand(cmd)
-                                                    .packageResolver(new PackagePaths(cmd, cachedDir))
-                                                    .build()))
-                                    .build();
+final EmbeddedPostgres postgres = new EmbeddedPostgres();
+postgres.start(cachedRuntimeConfig("/path/to/my/extracted/postgres"));
 ```
 
 ### How to configure logging
@@ -124,10 +91,10 @@ log4j.throwableRenderer=org.apache.log4j.EnhancedThrowableRenderer
 
 ### How to use your custom version of PostgreSQL
 
-Pass the required `IVersion` interface implementation as a first argument of the `PostgresConfig` object:
+Pass the required `IVersion` interface implementation as a first argument of the `EmbeddedPostgres` object:
 
 ```java
-final PostgresConfig config =  new PostgresConfig(() -> (IS_OS_WINDOWS) ? "9.6.2-2" : "9.6.2-1", ...);
+final EmbeddedPostgres postgres = new EmbeddedPostgres(() -> (IS_OS_WINDOWS) ? "9.6.2-2" : "9.6.2-1");
 ```
 
 ### Important Notes
@@ -141,6 +108,8 @@ final PostgresConfig config =  new PostgresConfig(() -> (IS_OS_WINDOWS) ? "9.6.2
 * It is no longer required to set up the LANG environment variable within your system, just pass that config as additionalInitDbParams.
 
 ### Supported Versions
-Versions: 9.6.2, 9.5.0, 9.4.4, 9.4.1, 9.3.5, 9.2.4, any custom
-Support for Linux, Windows and MacOSX.
+
+Versions: 9.6.2, 9.5.5, 9.4.10, any custom
+
+Platforms: Linux, Windows and MacOSX supported
 

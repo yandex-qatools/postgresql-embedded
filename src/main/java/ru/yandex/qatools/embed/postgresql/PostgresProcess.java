@@ -12,14 +12,16 @@ import de.flapdoodle.embed.process.io.progress.Slf4jProgressListener;
 import de.flapdoodle.embed.process.runtime.Executable;
 import de.flapdoodle.embed.process.runtime.ProcessControl;
 import de.flapdoodle.embed.process.store.IArtifactStore;
+import de.flapdoodle.embed.process.store.IMutableArtifactStore;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
-import ru.yandex.qatools.embed.postgresql.config.DownloadConfigBuilder;
+import ru.yandex.qatools.embed.postgresql.config.PostgresDownloadConfigBuilder;
+import ru.yandex.qatools.embed.postgresql.config.IMutableDownloadConfig;
 import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
 import ru.yandex.qatools.embed.postgresql.config.RuntimeConfigBuilder;
-import ru.yandex.qatools.embed.postgresql.ext.ArtifactStoreBuilder;
+import de.flapdoodle.embed.process.store.PostgresArtifactStoreBuilder;
 import ru.yandex.qatools.embed.postgresql.ext.LogWatchStreamProcessor;
-import ru.yandex.qatools.embed.postgresql.ext.PostgresArtifactStore;
+import de.flapdoodle.embed.process.store.PostgresArtifactStore;
 import ru.yandex.qatools.embed.postgresql.ext.SubdirTempDir;
 
 import java.io.File;
@@ -48,7 +50,6 @@ import static ru.yandex.qatools.embed.postgresql.Command.PgRestore;
 import static ru.yandex.qatools.embed.postgresql.Command.Psql;
 import static ru.yandex.qatools.embed.postgresql.PostgresStarter.getCommand;
 import static ru.yandex.qatools.embed.postgresql.config.AbstractPostgresConfig.Storage;
-import static ru.yandex.qatools.embed.postgresql.util.ReflectUtil.setFinalField;
 
 /**
  * postgres process
@@ -89,28 +90,30 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
             IArtifactStore artifactStore = runtimeConfig.getArtifactStore();
             IDownloadConfig downloadCfg = ((PostgresArtifactStore) artifactStore).getDownloadConfig();
 
-            // TODO: very hacky and unreliable way to respect the parent command's configuration
-            try { //NOSONAR
+            if (downloadCfg instanceof IMutableDownloadConfig) {
                 IDirectory tempDir = SubdirTempDir.defaultInstance();
                 if (downloadCfg.getPackageResolver() instanceof PackagePaths) {
                     tempDir = ((PackagePaths) downloadCfg.getPackageResolver()).getTempDir();
                 }
-                setFinalField(downloadCfg, "_packageResolver", new PackagePaths(cmd, tempDir));
-                setFinalField(artifactStore, "_downloadConfig", downloadCfg);
-            } catch (Exception e) {
-                // fallback to the default config
-                LOGGER.error("Could not use the configured artifact store for cmd, " +
-                        "falling back to default " + cmd, e);
-                downloadCfg = new DownloadConfigBuilder().defaultsForCommand(cmd)
+                ((IMutableDownloadConfig) downloadCfg).setPackageResolver(new PackagePaths(cmd, tempDir));
+            } else {
+                LOGGER.warn("Could not use the configured download configuration for '" + cmd.commandName() +
+                        "', falling back to default!");
+                downloadCfg = new PostgresDownloadConfigBuilder().defaultsForCommand(cmd)
                         .progressListener(new Slf4jProgressListener(LOGGER)).build();
-                artifactStore = new ArtifactStoreBuilder().defaults(cmd).download(downloadCfg).build();
+            }
+            if (artifactStore instanceof IMutableArtifactStore) {
+                ((IMutableArtifactStore) artifactStore).setDownloadConfig(downloadCfg);
+            } else {
+                LOGGER.warn("Could not use the configured artifact store for '" + cmd.commandName() +
+                        "', falling back to default!");
+                artifactStore = new PostgresArtifactStoreBuilder().defaults(cmd).download(downloadCfg).build();
             }
 
             final IRuntimeConfig runtimeCfg = new RuntimeConfigBuilder().defaults(cmd)
                     .processOutput(new ProcessOutput(logWatch, logWatch, logWatch))
                     .artifactStore(artifactStore)
                     .commandLinePostProcessor(runtimeConfig.getCommandLinePostProcessor()).build();
-
 
             final PostgresConfig postgresConfig = new PostgresConfig(config).withArgs(args);
             if (Command.InitDb == cmd) {
