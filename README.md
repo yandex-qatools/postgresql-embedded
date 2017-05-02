@@ -21,14 +21,14 @@ Add the following dependency to your pom.xml:
     <dependency>
         <groupId>ru.yandex.qatools.embed</groupId>
         <artifactId>postgresql-embedded</artifactId>
-        <version>1.22</version>
+        <version>1.23</version>
     </dependency>
 ```
 ### Gradle
 
 Add a line to build.gradle:
 ```groovy
-    compile 'ru.yandex.qatools.embed:postgresql-embedded:1.22'
+    compile 'ru.yandex.qatools.embed:postgresql-embedded:1.23'
 ```
 
 ## Howto
@@ -84,7 +84,7 @@ Here is the example of how to launch and use the embedded PostgreSQL instance
     process.stop();
 ```
 
-### How to use avoid archive extraction on every run
+### How to avoid archive extraction on every run
 
 You can specify the cached artifact store to avoid archives downloading and extraction (in case if a directory remains on every run)
 ```java
