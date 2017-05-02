@@ -1,4 +1,4 @@
-package ru.yandex.qatools.embed.postgresql.ext;
+package de.flapdoodle.embed.process.store;
 
 import de.flapdoodle.embed.process.config.store.FileSet;
 import de.flapdoodle.embed.process.config.store.FileSet.Entry;
@@ -9,7 +9,6 @@ import de.flapdoodle.embed.process.extract.IExtractedFileSet;
 import de.flapdoodle.embed.process.extract.ITempNaming;
 import de.flapdoodle.embed.process.extract.ImmutableExtractedFileSet.Builder;
 import de.flapdoodle.embed.process.io.directories.IDirectory;
-import de.flapdoodle.embed.process.store.IDownloader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

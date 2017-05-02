@@ -2,6 +2,7 @@ package ru.yandex.qatools.embed.postgresql;
 
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.io.progress.LoggingProgressListener;
+import de.flapdoodle.embed.process.store.NonCachedPostgresArtifactStoreBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,7 +10,6 @@ import ru.yandex.qatools.embed.postgresql.config.AbstractPostgresConfig;
 import ru.yandex.qatools.embed.postgresql.config.DownloadConfigBuilder;
 import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
 import ru.yandex.qatools.embed.postgresql.config.RuntimeConfigBuilder;
-import ru.yandex.qatools.embed.postgresql.ext.ArtifactStoreBuilder;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -71,7 +71,7 @@ public class TestPostgresStarter {
     protected IRuntimeConfig buildRuntimeConfig() {
         return new RuntimeConfigBuilder()
                 .defaults(Command.Postgres)
-                .artifactStore(new ArtifactStoreBuilder()
+                .artifactStore(new NonCachedPostgresArtifactStoreBuilder()
                         .defaults(Command.Postgres)
                         .download(new DownloadConfigBuilder()
                                 .defaultsForCommand(Command.Postgres)

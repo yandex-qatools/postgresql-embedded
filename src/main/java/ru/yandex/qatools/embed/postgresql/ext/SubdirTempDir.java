@@ -24,6 +24,7 @@ public class SubdirTempDir extends PropertyOrPlatformTempDir {
             } else {
                 tempDir = createTempDir(new File(System.getProperty("java.io.tmpdir")), "postgresql-embed");
             }
+            tempDir.deleteOnExit();
         } catch (IOException e) {
             throw new RuntimeException("Failed to create temp dir", e);
         }

@@ -1,4 +1,4 @@
-package ru.yandex.qatools.embed.postgresql.ext;
+package de.flapdoodle.embed.process.store;
 
 import de.flapdoodle.embed.process.config.store.FileSet;
 import de.flapdoodle.embed.process.config.store.FileType;

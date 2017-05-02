@@ -5,7 +5,7 @@ import ru.yandex.qatools.embed.postgresql.config.AbstractPostgresConfig;
 import ru.yandex.qatools.embed.postgresql.config.DownloadConfigBuilder;
 import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
 import ru.yandex.qatools.embed.postgresql.config.RuntimeConfigBuilder;
-import ru.yandex.qatools.embed.postgresql.ext.ArtifactStoreBuilder;
+import de.flapdoodle.embed.process.store.PostgresArtifactStoreBuilder;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -27,7 +27,7 @@ public class PostgresqlService {
     public void start() throws Exception {
         IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder()
                 .defaults(Command.Postgres)
-                .artifactStore(new ArtifactStoreBuilder()
+                .artifactStore(new PostgresArtifactStoreBuilder()
                         .defaults(Command.Postgres)
                         .download(new DownloadConfigBuilder()
                                 .defaultsForCommand(Command.Postgres).build()

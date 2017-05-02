@@ -5,7 +5,7 @@ import de.flapdoodle.embed.process.config.store.IDownloadConfig;
 import de.flapdoodle.embed.process.io.progress.Slf4jProgressListener;
 import de.flapdoodle.embed.process.runtime.ICommandLinePostProcessor;
 import ru.yandex.qatools.embed.postgresql.Command;
-import ru.yandex.qatools.embed.postgresql.ext.ArtifactStoreBuilder;
+import de.flapdoodle.embed.process.store.PostgresArtifactStoreBuilder;
 
 /**
  * Configuration builder
@@ -32,8 +32,8 @@ public class RuntimeConfigBuilder extends de.flapdoodle.embed.process.config.Run
         return this;
     }
 
-    private ArtifactStoreBuilder storeBuilder() {
-        return new ArtifactStoreBuilder();
+    private PostgresArtifactStoreBuilder storeBuilder() {
+        return new PostgresArtifactStoreBuilder();
     }
 
 }
