@@ -11,6 +11,8 @@ import de.flapdoodle.embed.process.extract.IExtractedFileSet;
 import de.flapdoodle.embed.process.extract.IExtractor;
 import de.flapdoodle.embed.process.extract.ITempNaming;
 import de.flapdoodle.embed.process.io.directories.IDirectory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,6 +22,7 @@ import java.io.IOException;
  *         Hacky ArtifactStore. Just to override the default FilesToExtract with PostgresFilesToExtract
  */
 public class PostgresArtifactStore implements IMutableArtifactStore {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PostgresArtifactStore.class);
     private IDownloadConfig downloadConfig;
     private IDirectory tempDirFactory;
     private ITempNaming executableNaming;
@@ -41,7 +44,7 @@ public class PostgresArtifactStore implements IMutableArtifactStore {
         try {
             ExtractedFileSets.delete(all);
         } catch (IllegalArgumentException e) {
-            System.err.println("Failed to remove file set: " + e.getMessage());//NOSONAR
+            LOGGER.error("Failed to remove file set", e);
         }
     }
 
@@ -73,8 +76,7 @@ public class PostgresArtifactStore implements IMutableArtifactStore {
             return extractor.extract(downloadConfig, artifact,
                     new PostgresFilesToExtract(tempDirFactory, executableNaming, fileSet));
         } catch (Exception e) {
-            e.printStackTrace();//NOSONAR
-            System.out.println("Failed to extract file set: " + e.getMessage());//NOSONAR
+            LOGGER.error("Failed to extract file set:", e);
             return new EmptyFileSet();
         }
     }
@@ -94,9 +96,8 @@ public class PostgresArtifactStore implements IMutableArtifactStore {
     }
 
     private void createOrCheckDir(File dir) {
-        if (!dir.exists()) {
-            if (!dir.mkdirs())
-                throw new IllegalArgumentException("Could NOT create Directory " + dir);
+        if (!dir.exists() && !dir.mkdirs()) {
+            throw new IllegalArgumentException("Could NOT create Directory " + dir);
         }
         if (!dir.isDirectory())
             throw new IllegalArgumentException("" + dir + " is not a Directory");

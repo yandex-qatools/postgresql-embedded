@@ -23,7 +23,7 @@ public class RuntimeConfigBuilder extends de.flapdoodle.embed.process.config.Run
         defaults(command);
         processOutput().overwriteDefault(PostgresProcessOutputConfig.getInstance(command, logger));
 
-        IDownloadConfig downloadConfig = new DownloadConfigBuilder()
+        IDownloadConfig downloadConfig = new PostgresDownloadConfigBuilder()
                 .defaultsForCommand(command)
                 .progressListener(new Slf4jProgressListener(logger))
                 .build();

@@ -15,7 +15,7 @@ import de.flapdoodle.embed.process.store.IArtifactStore;
 import de.flapdoodle.embed.process.store.IMutableArtifactStore;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
-import ru.yandex.qatools.embed.postgresql.config.DownloadConfigBuilder;
+import ru.yandex.qatools.embed.postgresql.config.PostgresDownloadConfigBuilder;
 import ru.yandex.qatools.embed.postgresql.config.IMutableDownloadConfig;
 import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
 import ru.yandex.qatools.embed.postgresql.config.RuntimeConfigBuilder;
@@ -99,7 +99,7 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
             } else {
                 LOGGER.warn("Could not use the configured download configuration for '" + cmd.commandName() +
                         "', falling back to default!");
-                downloadCfg = new DownloadConfigBuilder().defaultsForCommand(cmd)
+                downloadCfg = new PostgresDownloadConfigBuilder().defaultsForCommand(cmd)
                         .progressListener(new Slf4jProgressListener(LOGGER)).build();
             }
             if (artifactStore instanceof IMutableArtifactStore) {

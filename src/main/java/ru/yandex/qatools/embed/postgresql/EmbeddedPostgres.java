@@ -5,7 +5,7 @@ import de.flapdoodle.embed.process.distribution.IVersion;
 import de.flapdoodle.embed.process.io.directories.FixedPath;
 import de.flapdoodle.embed.process.store.PostgresArtifactStoreBuilder;
 import ru.yandex.qatools.embed.postgresql.config.AbstractPostgresConfig;
-import ru.yandex.qatools.embed.postgresql.config.DownloadConfigBuilder;
+import ru.yandex.qatools.embed.postgresql.config.PostgresDownloadConfigBuilder;
 import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
 import ru.yandex.qatools.embed.postgresql.config.RuntimeConfigBuilder;
 
@@ -24,11 +24,11 @@ import static ru.yandex.qatools.embed.postgresql.util.SocketUtil.findFreePort;
  * Helper class simplifying the start up configuration for embedded postgres
  */
 public class EmbeddedPostgres {
-    public static final String DEFAULT_USER = "postgres";
-    public static final String DEFAULT_PASSWORD = "postgres";
-    public static final String DEFAULT_DB_NAME = "postgres";
+    public static final String DEFAULT_USER = "postgres";//NOSONAR
+    public static final String DEFAULT_PASSWORD = "postgres";//NOSONAR
+    public static final String DEFAULT_DB_NAME = "postgres";//NOSONAR
     public static final String DEFAULT_HOST = "localhost";
-    public static final List<String> DEFAULT_ADD_PARAMS = asList(
+    private static final List<String> DEFAULT_ADD_PARAMS = asList(
             "-E", "SQL_ASCII",
             "--locale=C",
             "--lc-collate=C",
@@ -55,7 +55,7 @@ public class EmbeddedPostgres {
                 .defaults(Command.Postgres)
                 .artifactStore(new PostgresArtifactStoreBuilder()
                         .defaults(Command.Postgres)
-                        .download(new DownloadConfigBuilder()
+                        .download(new PostgresDownloadConfigBuilder()
                                 .defaultsForCommand(Command.Postgres)
                                 .build()))
                 .build();
@@ -76,7 +76,7 @@ public class EmbeddedPostgres {
                 .artifactStore(new PostgresArtifactStoreBuilder()
                         .defaults(cmd)
                         .tempDir(cachedDir)
-                        .download(new DownloadConfigBuilder()
+                        .download(new PostgresDownloadConfigBuilder()
                                 .defaultsForCommand(cmd)
                                 .packageResolver(new PackagePaths(cmd, cachedDir))
                                 .build()))
@@ -160,7 +160,7 @@ public class EmbeddedPostgres {
     }
 
     private String formatConnUrl(PostgresConfig config) {
-        return format("jdbc:postgresql://%s:%s/%s?user=%s&password=%s",
+        return format("jdbc:postgresql://%s:%s/%s?user=%s&password=%s",//NOSONAR
                 config.net().host(),
                 config.net().port(),
                 config.storage().dbName(),

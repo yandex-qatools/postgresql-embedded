@@ -3,7 +3,7 @@ package ru.yandex.qatools.embed.postgresql;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.io.directories.FixedPath;
 import de.flapdoodle.embed.process.store.PostgresArtifactStoreBuilder;
-import ru.yandex.qatools.embed.postgresql.config.DownloadConfigBuilder;
+import ru.yandex.qatools.embed.postgresql.config.PostgresDownloadConfigBuilder;
 import ru.yandex.qatools.embed.postgresql.config.RuntimeConfigBuilder;
 
 import java.nio.file.Paths;
@@ -21,7 +21,7 @@ public class TestPostgresCachedDirStarter extends TestPostgresStarter {
                 .artifactStore(new PostgresArtifactStoreBuilder()
                         .defaults(cmd)
                         .tempDir(cachedDir)
-                        .download(new DownloadConfigBuilder()
+                        .download(new PostgresDownloadConfigBuilder()
                                 .defaultsForCommand(cmd)
                                 .packageResolver(new PackagePaths(cmd, cachedDir))
                                 .build()))

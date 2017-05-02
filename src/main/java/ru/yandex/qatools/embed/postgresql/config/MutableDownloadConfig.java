@@ -20,9 +20,9 @@ public class MutableDownloadConfig implements IMutableDownloadConfig {
     private final IProxyFactory proxyFactory;
     private IPackageResolver packageResolver;
 
-    public MutableDownloadConfig(IDownloadPath downloadPath, String downloadPrefix, IPackageResolver packageResolver,
-                                 IDirectory artifactStorePath, ITempNaming fileNaming, IProgressListener progressListener, String userAgent,
-                                 ITimeoutConfig timeoutConfig, IProxyFactory proxyFactory) {
+    public MutableDownloadConfig(IDownloadPath downloadPath, String downloadPrefix, IPackageResolver packageResolver,//NOSONAR
+                                 IDirectory artifactStorePath, ITempNaming fileNaming, IProgressListener progressListener, String userAgent,//NOSONAR
+                                 ITimeoutConfig timeoutConfig, IProxyFactory proxyFactory) { //NOSONAR
         super();
         this.downloadPath = downloadPath;
         this.downloadPrefix = downloadPrefix;

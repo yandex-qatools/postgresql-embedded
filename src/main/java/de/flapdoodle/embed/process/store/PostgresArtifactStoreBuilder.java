@@ -2,7 +2,7 @@ package de.flapdoodle.embed.process.store;
 
 import de.flapdoodle.embed.process.extract.UUIDTempNaming;
 import ru.yandex.qatools.embed.postgresql.Command;
-import ru.yandex.qatools.embed.postgresql.config.DownloadConfigBuilder;
+import ru.yandex.qatools.embed.postgresql.config.PostgresDownloadConfigBuilder;
 import ru.yandex.qatools.embed.postgresql.ext.SubdirTempDir;
 
 public class PostgresArtifactStoreBuilder extends
@@ -11,7 +11,7 @@ public class PostgresArtifactStoreBuilder extends
     public PostgresArtifactStoreBuilder defaults(Command command) {
         tempDir().setDefault(new SubdirTempDir());
         executableNaming().setDefault(new UUIDTempNaming());
-        download().setDefault(new DownloadConfigBuilder().defaultsForCommand(command).build());
+        download().setDefault(new PostgresDownloadConfigBuilder().defaultsForCommand(command).build());
         downloader().setDefault(new Downloader());
         return this;
     }

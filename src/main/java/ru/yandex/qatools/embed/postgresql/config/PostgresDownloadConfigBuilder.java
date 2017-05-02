@@ -2,6 +2,7 @@ package ru.yandex.qatools.embed.postgresql.config;
 
 import de.flapdoodle.embed.process.builder.IProperty;
 import de.flapdoodle.embed.process.builder.TypedProperty;
+import de.flapdoodle.embed.process.config.store.DownloadConfigBuilder;
 import de.flapdoodle.embed.process.config.store.DownloadPath;
 import de.flapdoodle.embed.process.config.store.IDownloadConfig;
 import de.flapdoodle.embed.process.config.store.IDownloadPath;
@@ -22,7 +23,7 @@ import ru.yandex.qatools.embed.postgresql.ext.SubdirTempDir;
 /**
  * Download config builder for postgres
  */
-public class DownloadConfigBuilder extends de.flapdoodle.embed.process.config.store.DownloadConfigBuilder {
+public class PostgresDownloadConfigBuilder extends DownloadConfigBuilder {
     private static final TypedProperty<UserAgent> USER_AGENT = TypedProperty.with("UserAgent", UserAgent.class);
     private static final TypedProperty<IProgressListener> PROGRESS_LISTENER = TypedProperty.with("ProgressListener", IProgressListener.class);
     private static final TypedProperty<ITempNaming> FILE_NAMING = TypedProperty.with("FileNaming", ITempNaming.class);
@@ -34,7 +35,7 @@ public class DownloadConfigBuilder extends de.flapdoodle.embed.process.config.st
     private static final TypedProperty<ITimeoutConfig> TIMEOUT_CONFIG = TypedProperty.with("TimeoutConfig", ITimeoutConfig.class);
     private static final TypedProperty<IProxyFactory> PROXY_FACTORY = TypedProperty.with("ProxyFactory", IProxyFactory.class);
 
-    public DownloadConfigBuilder defaultsForCommand(Command command) {
+    public PostgresDownloadConfigBuilder defaultsForCommand(Command command) {
         fileNaming().setDefault(new UUIDTempNaming());
         // I've found the only open and easy to use cross platform binaries
         downloadPath().setDefault(new DownloadPath("http://get.enterprisedb.com/postgresql/"));
@@ -71,83 +72,101 @@ public class DownloadConfigBuilder extends de.flapdoodle.embed.process.config.st
                 progressListener, userAgent, timeoutConfig, proxyFactory);
     }
 
-    public de.flapdoodle.embed.process.config.store.DownloadConfigBuilder downloadPath(String path) {
+    @Override
+    public DownloadConfigBuilder downloadPath(String path) {
         set(DOWNLOAD_PATH, new DownloadPath(path));
         return this;
     }
 
+    @Override
     protected IProperty<IDownloadPath> downloadPath() {
         return property(DOWNLOAD_PATH);
     }
 
-    public de.flapdoodle.embed.process.config.store.DownloadConfigBuilder downloadPrefix(String prefix) {
+    @Override
+    public DownloadConfigBuilder downloadPrefix(String prefix) {
         set(DOWNLOAD_PREFIX, new DownloadPrefix(prefix));
         return this;
     }
 
+    @Override
     protected IProperty<DownloadPrefix> downloadPrefix() {
         return property(DOWNLOAD_PREFIX);
     }
 
-    public de.flapdoodle.embed.process.config.store.DownloadConfigBuilder packageResolver(IPackageResolver packageResolver) {
+    @Override
+    public DownloadConfigBuilder packageResolver(IPackageResolver packageResolver) {
         set(PACKAGE_RESOLVER, packageResolver);
         return this;
     }
 
+    @Override
     protected IProperty<IPackageResolver> packageResolver() {
         return property(PACKAGE_RESOLVER);
     }
 
-    public de.flapdoodle.embed.process.config.store.DownloadConfigBuilder artifactStorePath(IDirectory artifactStorePath) {
+    @Override
+    public DownloadConfigBuilder artifactStorePath(IDirectory artifactStorePath) {
         set(ARTIFACT_STORE_PATH, artifactStorePath);
         return this;
     }
 
+    @Override
     protected IProperty<IDirectory> artifactStorePath() {
         return property(ARTIFACT_STORE_PATH);
     }
 
-    public de.flapdoodle.embed.process.config.store.DownloadConfigBuilder fileNaming(ITempNaming fileNaming) {
+    @Override
+    public DownloadConfigBuilder fileNaming(ITempNaming fileNaming) {
         set(FILE_NAMING, fileNaming);
         return this;
     }
 
+    @Override
     protected IProperty<ITempNaming> fileNaming() {
         return property(FILE_NAMING);
     }
 
-    public de.flapdoodle.embed.process.config.store.DownloadConfigBuilder progressListener(IProgressListener progressListener) {
+    @Override
+    public DownloadConfigBuilder progressListener(IProgressListener progressListener) {
         set(PROGRESS_LISTENER, progressListener);
         return this;
     }
 
+    @Override
     protected IProperty<IProgressListener> progressListener() {
         return property(PROGRESS_LISTENER);
     }
 
-    public de.flapdoodle.embed.process.config.store.DownloadConfigBuilder userAgent(String userAgent) {
+    @Override
+    public DownloadConfigBuilder userAgent(String userAgent) {
         set(USER_AGENT, new UserAgent(userAgent));
         return this;
     }
 
+    @Override
     protected IProperty<UserAgent> userAgent() {
         return property(USER_AGENT);
     }
 
-    public de.flapdoodle.embed.process.config.store.DownloadConfigBuilder timeoutConfig(ITimeoutConfig timeoutConfig) {
+    @Override
+    public DownloadConfigBuilder timeoutConfig(ITimeoutConfig timeoutConfig) {
         set(TIMEOUT_CONFIG, timeoutConfig);
         return this;
     }
 
+    @Override
     protected IProperty<ITimeoutConfig> timeoutConfig() {
         return property(TIMEOUT_CONFIG);
     }
 
-    public de.flapdoodle.embed.process.config.store.DownloadConfigBuilder proxyFactory(IProxyFactory proxyFactory) {
+    @Override
+    public DownloadConfigBuilder proxyFactory(IProxyFactory proxyFactory) {
         set(PROXY_FACTORY, proxyFactory);
         return this;
     }
 
+    @Override
     protected IProperty<IProxyFactory> proxyFactory() {
         return property(PROXY_FACTORY);
     }
