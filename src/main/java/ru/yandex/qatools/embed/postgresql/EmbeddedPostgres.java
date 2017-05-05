@@ -170,6 +170,6 @@ public class EmbeddedPostgres {
     }
 
     public void stop() {
-        getProcess().orElseThrow(() -> new IllegalStateException("Cannot stop not started instance!"));
+        getProcess().orElseThrow(() -> new IllegalStateException("Cannot stop not started instance!")).stop();
     }
 }
