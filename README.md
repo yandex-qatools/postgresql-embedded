@@ -19,14 +19,14 @@ Add the following dependency to your pom.xml:
 <dependency>
     <groupId>ru.yandex.qatools.embed</groupId>
     <artifactId>postgresql-embedded</artifactId>
-    <version>2.0</version>
+    <version>2.1</version>
 </dependency>
 ```
 ### Gradle
 
 Add a line to build.gradle:
 ```groovy
-compile 'ru.yandex.qatools.embed:postgresql-embedded:2.0'
+compile 'ru.yandex.qatools.embed:postgresql-embedded:2.1'
 ```
 
 ## Howto
