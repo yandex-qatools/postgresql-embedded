@@ -18,7 +18,7 @@ install:
 build_script:
   - mvn clean package --batch-mode -DskipTests -Djna.nosys=true
 test_script:
-  - psexec -i -l cmd /c "SET M2_HOME=C:\maven\apache-maven-3.2.5 & SET JAVA_HOME=C:\Program Files\Java\jdk1.8.0 & SET PATH=C:\maven\apache-maven-3.2.5\bin;%JAVA_HOME%\bin;%PATH% & mvn clean install --batch-mode -Djna.nosys=true"
+  - psexec -i -l cmd /c "SET M2_HOME=C:\maven\apache-maven-3.2.5 & SET JAVA_HOME=C:\Program Files\Java\jdk1.8.0 & C:\maven\apache-maven-3.2.5\bin\mvn.bat clean install --batch-mode -Djna.nosys=true"
 cache:
   - C:\maven\
   - C:\Users\appveyor\.m2
