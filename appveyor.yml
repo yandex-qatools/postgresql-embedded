@@ -15,10 +15,24 @@ install:
   - cmd: SET M2_HOME=C:\maven\apache-maven-3.2.5
   - cmd: SET MAVEN_OPTS=-XX:MaxPermSize=2g -Xmx4g
   - cmd: SET JAVA_OPTS=-XX:MaxPermSize=2g -Xmx4g
+  - cmd: SET PASSWORD=zklDDH243765s
+  - cmd: net user /add postgres %PASSWORD%
+  - cmd: net localgroup "Remote Desktop Users" postgres /ADD
+
+  - cmd: SET PROJ=C:\Users\postgres
+  - cmd: SET SRC=%PROJ%\src
+  - cmd: mkdir %SRC%
+  - cmd: xcopy /s %CD% %SRC%
+  - cmd: icacls %PROJ% /t /grant Everyone:(OI)(CI)F
+  - cmd: icacls %SRC% /t /grant Everyone:(OI)(CI)F
+  - cmd: cd %SRC%
+  - cmd: cpau.exe -u postgres -p %PASSWORD% -ex "whoami"
+  - cmd: cpau.exe -u postgres -p %PASSWORD% -ex "cd %SRC%&& dir"
 build_script:
-  - mvn clean package --batch-mode -DskipTests -Djna.nosys=true
+  - runas /env /user:postgres cmd /c "cd %SRC%&& SET M2_HOME=%M2_HOME%&& %M2_HOME%\bin\mvn.bat clean install -B -DskipTests -Djna.nosys=true"
 test_script:
-  - psexec -i -l cmd /c "SET M2_HOME=C:\maven\apache-maven-3.2.5 & SET JAVA_HOME=C:\Program Files\Java\jdk1.8.0 & C:\maven\apache-maven-3.2.5\bin\mvn.bat clean install --batch-mode -Djna.nosys=true 2>&1"
+  - runas /env /user:postgres cmd /c "cd %SRC%&& SET M2_HOME=%M2_HOME%&& %M2_HOME%\bin\mvn.bat clean install -B -Djna.nosys=true"
 cache:
   - C:\maven\
   - C:\Users\appveyor\.m2
+  - C:\Users\postgres\.m2
