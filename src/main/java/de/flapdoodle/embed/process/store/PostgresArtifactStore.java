@@ -1,11 +1,11 @@
 package de.flapdoodle.embed.process.store;
 
 import de.flapdoodle.embed.process.config.store.FileSet;
+import de.flapdoodle.embed.process.config.store.FileType;
 import de.flapdoodle.embed.process.config.store.IDownloadConfig;
 import de.flapdoodle.embed.process.config.store.IPackageResolver;
 import de.flapdoodle.embed.process.distribution.ArchiveType;
 import de.flapdoodle.embed.process.distribution.Distribution;
-import de.flapdoodle.embed.process.extract.ExtractedFileSets;
 import de.flapdoodle.embed.process.extract.Extractors;
 import de.flapdoodle.embed.process.extract.IExtractedFileSet;
 import de.flapdoodle.embed.process.extract.IExtractor;
@@ -16,6 +16,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.EnumSet;
+
+import static org.apache.commons.io.FileUtils.deleteQuietly;
 
 /**
  * @author Ilya Sadykov
@@ -41,10 +44,21 @@ public class PostgresArtifactStore implements IMutableArtifactStore {
 
     @Override
     public void removeFileSet(Distribution distribution, IExtractedFileSet all) {
-        try {
-            ExtractedFileSets.delete(all);
-        } catch (IllegalArgumentException e) {
-            LOGGER.error("Failed to remove file set", e);
+        for (FileType type : EnumSet.complementOf(EnumSet.of(FileType.Executable))) {
+            for (File file : all.files(type)) {
+                if (file.exists() && !deleteQuietly(file))
+                    LOGGER.trace("Could not delete {} NOW: {}", type, file);
+            }
+        }
+        File exe = all.executable();
+        if (exe.exists() && !deleteQuietly(exe)) {
+            LOGGER.trace("Could not delete executable NOW: {}", exe);
+        }
+
+        if (all.baseDirIsGenerated()) {
+            if (!deleteQuietly(all.baseDir())) {
+                LOGGER.trace("Could not delete generatedBaseDir: {}", all.baseDir());
+            }
         }
     }
 
