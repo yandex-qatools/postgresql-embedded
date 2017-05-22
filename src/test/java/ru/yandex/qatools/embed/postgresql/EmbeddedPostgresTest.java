@@ -42,7 +42,6 @@ public class EmbeddedPostgresTest {
         assertThat(url, startsWith("jdbc:postgresql://localhost:"));
         assertThat(url, endsWith(format("/%s?user=%s&password=%s", DEFAULT_DB_NAME, DEFAULT_USER, DEFAULT_PASSWORD)));
         ensurePostgresIsWorking(url);
-
     }
 
     @Test

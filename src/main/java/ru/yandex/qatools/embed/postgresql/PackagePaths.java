@@ -49,8 +49,7 @@ public class PackagePaths implements IPackageResolver {
         try {
             return FileSet.builder()
                     .addEntry(FileType.Executable, tempDir.asFile().getPath(),
-                            "^.*" + Paths.get("pgsql", "bin", cmdPattern)
-                                    .toString().replace("\\", "\\\\") + "$")
+                            "^.*" + Paths.get("pgsql", "bin", cmdPattern).toString().replace("\\", "\\\\") + "$")
                     .build();
         } catch (Exception e) {
             throw new RuntimeException(e);

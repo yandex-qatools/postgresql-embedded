@@ -28,8 +28,12 @@ import java.nio.file.Paths;
  */
 public class PostgresFilesToExtract extends FilesToExtract {
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresFilesToExtract.class);
-    final FileSet fileSet;
-    final IDirectory extractDir;
+
+    private static final String SKIP_PATTERN = "pgsql/(doc|include|symbols|pgAdmin[^/]*)/.+";
+    private static final String EXECUTABLE_PATTERN = "pgsql/bin/.+";
+
+    private final FileSet fileSet;
+    private final IDirectory extractDir;
 
     public PostgresFilesToExtract(IDirectory dirFactory, ITempNaming executableNaming, FileSet fileSet) {
         super(dirFactory, executableNaming, fileSet);
@@ -43,6 +47,14 @@ public class PostgresFilesToExtract extends FilesToExtract {
      */
     @Override
     public IExtractionMatch find(final IArchiveEntry entry) {//NOSONAR
+        if (entry.getName().matches(SKIP_PATTERN)) {
+            return null;
+        }
+        if (extractDir == null || extractDir.asFile() == null) {
+            return null;
+        }
+        String basePath = extractDir.asFile().getPath();
+        final Path path = Paths.get(basePath, entry.getName());
         return new IExtractionMatch() { //NOSONAR
             @Override
             public File write(InputStream source, long size) throws IOException { //NOSONAR
@@ -64,14 +76,9 @@ public class PostgresFilesToExtract extends FilesToExtract {
                                 "Has it changed?", e);
                     }
                 }
-                if (extractDir == null || extractDir.asFile() == null) {
-                    return null;
-                }
-
                 // I got some problems with concurrency. Not sure this is required.
                 synchronized (PostgresFilesToExtract.class) {
-                    final String basePath = extractDir.asFile().getPath();
-                    final File outputFile = Paths.get(basePath, entry.getName()).toFile();
+                    final File outputFile = path.toFile();
                     if (entry.isDirectory()) {
                         if (!outputFile.exists()) {
                             Files.createDir(outputFile);
@@ -80,7 +87,7 @@ public class PostgresFilesToExtract extends FilesToExtract {
                         if (!outputFile.exists()) { // prevent double extraction (for other binaries)
                             if (isSymLink) {
                                 try { // NOSONAR
-                                    final Path target = outputFile.toPath().getParent().resolve(Paths.get(linkName));
+                                    final Path target = path.getParent().resolve(Paths.get(linkName));
                                     java.nio.file.Files.createSymbolicLink(outputFile.toPath(), target);
                                 } catch (Exception e) {
                                     LOGGER.trace("Failed to extract symlink", e);
@@ -90,7 +97,7 @@ public class PostgresFilesToExtract extends FilesToExtract {
                             }
                         }
                         // hack to mark binaries as executable
-                        if (entry.getName().matches("pgsql/bin/.+")) {
+                        if (entry.getName().matches(EXECUTABLE_PATTERN)) {
                             outputFile.setExecutable(true);
                         }
                     }
@@ -102,7 +109,7 @@ public class PostgresFilesToExtract extends FilesToExtract {
             public FileType type() {
                 // does this archive entry match to any of the provided fileset entries?
                 for (FileSet.Entry matchingEntry : fileSet.entries()) {
-                    if (matchingEntry.matchingPattern().matcher(entry.getName()).matches()) {
+                    if (matchingEntry.matchingPattern().matcher(path.toString()).matches()) {
                         return matchingEntry.type();
                     }
                 }
