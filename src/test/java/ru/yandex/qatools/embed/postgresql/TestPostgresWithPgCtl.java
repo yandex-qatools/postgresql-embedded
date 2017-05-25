@@ -2,6 +2,7 @@ package ru.yandex.qatools.embed.postgresql;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import ru.yandex.qatools.embed.postgresql.config.AbstractPostgresConfig;
 import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
@@ -21,6 +22,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static ru.yandex.qatools.embed.postgresql.util.SocketUtil.findFreePort;
 
+@Ignore
 public class TestPostgresWithPgCtl {
 
     private PostgresProcess process;
