@@ -41,7 +41,7 @@ public class PostgresDownloadConfigBuilder extends DownloadConfigBuilder {
         downloadPath().setDefault(new DownloadPath("http://get.enterprisedb.com/postgresql/"));
         packageResolver().setDefault(new PackagePaths(command, SubdirTempDir.defaultInstance()));
         artifactStorePath().setDefault(new UserHome(".embedpostgresql"));
-        downloadPrefix().setDefault(new DownloadPrefix("posgresql-download"));
+        downloadPrefix().setDefault(new DownloadPrefix("postgresql-download"));
         userAgent().setDefault(new UserAgent("Mozilla/5.0 (compatible; Embedded postgres; +https://github.com/yandex-qatools)"));
         progressListener().setDefault(new StandardConsoleProgressListener() {
             @Override
