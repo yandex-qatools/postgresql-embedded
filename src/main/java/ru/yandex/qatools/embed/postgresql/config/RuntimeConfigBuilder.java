@@ -13,6 +13,7 @@ import de.flapdoodle.embed.process.store.PostgresArtifactStoreBuilder;
 public class RuntimeConfigBuilder extends de.flapdoodle.embed.process.config.RuntimeConfigBuilder {
 
     public RuntimeConfigBuilder defaults(Command command) {
+        daemonProcess().setDefault(false);
         processOutput().setDefault(ProcessOutput.getDefaultInstance(command.commandName()));
         commandLinePostProcessor().setDefault(new ICommandLinePostProcessor.Noop());
         artifactStore().setDefault(storeBuilder().defaults(command).build());
