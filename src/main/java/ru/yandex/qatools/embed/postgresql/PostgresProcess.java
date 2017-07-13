@@ -255,6 +255,7 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
                     new HashSet<>(singleton("database creation failed")), 3000, getConfig().storage().dbName());
             try {
                 if (isEmpty(output) || !output.contains("could not connect to database")) {
+                    this.processReady = true;
                     break;
                 }
                 LOGGER.warn("Could not create database first time ({} of {} trials)", trial, MAX_CREATEDB_TRIALS);
