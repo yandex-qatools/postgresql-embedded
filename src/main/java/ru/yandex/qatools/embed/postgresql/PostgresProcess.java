@@ -84,7 +84,7 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
     private static String runCmd(
             PostgresConfig config, IRuntimeConfig runtimeConfig, Command cmd, String successOutput, Set<String> failOutput, long timeout, String... args) {
         try {
-            LogWatchStreamProcessor logWatch = new LogWatchStreamProcessor(successOutput,
+            final LogWatchStreamProcessor logWatch = new LogWatchStreamProcessor(successOutput,
                     failOutput, new Slf4jStreamProcessor(LOGGER, Slf4jLevel.TRACE));
 
             IArtifactStore artifactStore = runtimeConfig.getArtifactStore();
@@ -119,7 +119,7 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
             if (Command.InitDb == cmd) {
                 postgresConfig.withAdditionalInitDbParams(config.getAdditionalInitDbParams());
             }
-            Executable<?, ? extends AbstractPGProcess> exec = getCommand(cmd, runtimeCfg)
+            final Executable<?, ? extends AbstractPGProcess> exec = getCommand(cmd, runtimeCfg)
                     .prepare(postgresConfig);
             AbstractPGProcess proc = exec.start();
             logWatch.waitForResult(timeout);
