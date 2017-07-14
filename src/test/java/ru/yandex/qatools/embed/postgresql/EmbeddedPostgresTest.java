@@ -3,7 +3,9 @@ package ru.yandex.qatools.embed.postgresql;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import ru.yandex.qatools.embed.postgresql.distribution.Version;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -65,8 +67,26 @@ public class EmbeddedPostgresTest {
 
     @Test
     public void itShouldWorkWithCachedRuntimeConfig() throws Exception {
-        final String url = postgres.start(cachedRuntimeConfig(Paths.get(System.getProperty("java.io.tmpdir"), "pgembed")));
+        final String url = postgres.start(cachedRuntimeConfig(getTempDir("pgembed")));
         ensurePostgresIsWorking(url);
+    }
+
+    private Path getTempDir(String name) {
+        return Paths.get(System.getProperty("java.io.tmpdir"), name);
+    }
+
+    @Test
+    public void itShouldRunTwoDifferentPostgresVersions() throws Exception {
+        final EmbeddedPostgres postgres1 = new EmbeddedPostgres(Version.Main.V9_6);
+        final EmbeddedPostgres postgres2 = new EmbeddedPostgres(Version.Main.V9_5);
+        final String url1 = postgres1.start(cachedRuntimeConfig(getTempDir("postgres1")));
+        final String url2 = postgres2.start(cachedRuntimeConfig(getTempDir("postgres2")));
+
+        ensurePostgresIsWorking(url1);
+        ensurePostgresIsWorking(url2);
+
+        postgres1.stop();
+        postgres2.stop();
     }
 
     private void ensurePostgresIsWorking(String url) {
