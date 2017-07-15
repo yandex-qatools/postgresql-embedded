@@ -227,10 +227,14 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
 
     protected void deleteTempFiles() {
         final Storage storage = getConfig().storage();
-        if (storage.dbDir()==null) return;
-        if(!storage.isTmpDir()) return;
+        if (storage.dbDir() == null) {
+            return;
+        }
+        if (!storage.isTmpDir()) {
+            return;
+        }
 
-        if ((!forceDelete(storage.dbDir()))) {
+        if (!forceDelete(storage.dbDir())) {
             LOGGER.warn("Could not delete temp db dir: {}", storage.dbDir());
         }
     }
