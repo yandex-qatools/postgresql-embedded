@@ -189,6 +189,12 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
             throws IOException {
         super.onBeforeProcess(runtimeConfig);
         PostgresConfig config = getConfig();
+
+        final File     dbDir   = config.storage().dbDir();
+        if (dbDir.exists() && dbDir.listFiles() != null && dbDir.listFiles().length > 0) {
+            return;
+        }
+
         runCmd(config, runtimeConfig, InitDb, "Success. You can now start the database server using", 1000);
     }
 
@@ -221,7 +227,10 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
 
     protected void deleteTempFiles() {
         final Storage storage = getConfig().storage();
-        if ((storage.dbDir() != null) && (storage.isTmpDir()) && (!forceDelete(storage.dbDir()))) {
+        if (storage.dbDir()==null) return;
+        if(!storage.isTmpDir()) return;
+
+        if ((!forceDelete(storage.dbDir()))) {
             LOGGER.warn("Could not delete temp db dir: {}", storage.dbDir());
         }
     }
@@ -229,9 +238,10 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
     @Override
     protected final void onAfterProcessStart(ProcessControl process,
                                              IRuntimeConfig runtimeConfig) throws IOException {
-        final Path pidFilePath = Paths.get(getConfig().storage().dbDir().getAbsolutePath(), "postmaster.pid");
-        final File pidFile = new File(pidFilePath.toAbsolutePath().toString());
-        int timeout = TIMEOUT;
+        final Storage storage     = getConfig().storage();
+        final Path    pidFilePath = Paths.get(storage.dbDir().getAbsolutePath(), "postmaster.pid");
+        final File    pidFile     = new File(pidFilePath.toAbsolutePath().toString());
+        int           timeout     = TIMEOUT;
         while (!pidFile.exists() && ((timeout = timeout - 100) > 0)) {
             try {
                 sleep(100);
@@ -249,10 +259,16 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
             // fallback, try to read pid file. will throw IOException if that fails
             setProcessId(getPidFromFile(pidFile()));
         }
+
         int trial = 0;
         do {
-            String output = runCmd(getConfig(), runtimeConfig, CreateDb, "",
-                    new HashSet<>(singleton("database creation failed")), 3000, getConfig().storage().dbName());
+            String output = runCmd(getConfig(),
+                                   runtimeConfig,
+                                   CreateDb,
+                                   "",
+                                   new HashSet<>(singleton("database creation failed")),
+                                   3000,
+                                   storage.dbName());
             try {
                 if (isEmpty(output) || !output.contains("could not connect to database")) {
                     this.processReady = true;
