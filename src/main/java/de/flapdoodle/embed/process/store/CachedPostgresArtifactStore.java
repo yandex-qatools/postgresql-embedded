@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 import static de.flapdoodle.embed.process.config.store.FileType.Executable;
 import static de.flapdoodle.embed.process.config.store.FileType.Library;
@@ -44,8 +45,12 @@ public class CachedPostgresArtifactStore extends PostgresArtifactStore {
         try {
             final File dir = this.eDir.asFile();
             final FileSet filesSet = downloadConfig.getPackageResolver().getFileSet(distribution);
-            if (dir.exists() && dir.isDirectory() && filesSet.entries().stream()
-                    .allMatch(entry -> exists(get(dir.getPath(), "pgsql", "bin")))) {
+            final Path path = get(dir.getPath(),
+                                  "pgsql" + "-" + distribution.getVersion().asInDownloadPath(), "bin");
+            if (dir.exists()
+                && dir.isDirectory()
+                && filesSet.entries().stream().allMatch(entry -> exists(path))
+              ) {
                 final Builder extracted = builder(dir).baseDirIsGenerated(false);
                 iterateFiles(dir, TRUE, TRUE).forEachRemaining(file -> {
                     FileType type = Library;

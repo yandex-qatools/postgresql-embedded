@@ -2,11 +2,8 @@ package de.flapdoodle.embed.process.store;
 
 import de.flapdoodle.embed.process.config.store.FileSet;
 import de.flapdoodle.embed.process.config.store.FileType;
-import de.flapdoodle.embed.process.extract.CommonsArchiveEntryAdapter;
-import de.flapdoodle.embed.process.extract.FilesToExtract;
-import de.flapdoodle.embed.process.extract.IArchiveEntry;
-import de.flapdoodle.embed.process.extract.IExtractionMatch;
-import de.flapdoodle.embed.process.extract.ITempNaming;
+import de.flapdoodle.embed.process.distribution.Distribution;
+import de.flapdoodle.embed.process.extract.*;
 import de.flapdoodle.embed.process.io.directories.IDirectory;
 import de.flapdoodle.embed.process.io.file.Files;
 import org.apache.commons.compress.archivers.ArchiveEntry;
@@ -32,13 +29,23 @@ public class PostgresFilesToExtract extends FilesToExtract {
     private static final String SKIP_PATTERN = "pgsql/(doc|include|symbols|pgAdmin[^/]*)/.+";
     private static final String EXECUTABLE_PATTERN = "pgsql/bin/.+";
 
-    private final FileSet fileSet;
-    private final IDirectory extractDir;
+    private final FileSet    fileSet;
+    private final String       extractBasePath;
 
-    public PostgresFilesToExtract(IDirectory dirFactory, ITempNaming executableNaming, FileSet fileSet) {
+    public PostgresFilesToExtract(IDirectory dirFactory, ITempNaming executableNaming, FileSet fileSet, Distribution distribution) {
         super(dirFactory, executableNaming, fileSet);
         this.fileSet = fileSet;
-        this.extractDir = dirFactory;
+
+        if (dirFactory.asFile() != null) {
+            final File file = new File(dirFactory.asFile(), "pgsql-" + distribution.getVersion().asInDownloadPath());
+            if (!file.exists()) {
+                //noinspection ResultOfMethodCallIgnored
+                file.mkdir();
+            }
+            this.extractBasePath = file.getPath();
+        } else {
+            this.extractBasePath = null;
+        }
     }
 
     /**
@@ -47,14 +54,14 @@ public class PostgresFilesToExtract extends FilesToExtract {
      */
     @Override
     public IExtractionMatch find(final IArchiveEntry entry) {//NOSONAR
+        if (this.extractBasePath == null) {
+            return null;
+        }
         if (entry.getName().matches(SKIP_PATTERN)) {
             return null;
         }
-        if (extractDir == null || extractDir.asFile() == null) {
-            return null;
-        }
-        String basePath = extractDir.asFile().getPath();
-        final Path path = Paths.get(basePath, entry.getName());
+
+        final Path path = Paths.get(this.extractBasePath, entry.getName());
         return new IExtractionMatch() { //NOSONAR
             @Override
             public File write(InputStream source, long size) throws IOException { //NOSONAR
