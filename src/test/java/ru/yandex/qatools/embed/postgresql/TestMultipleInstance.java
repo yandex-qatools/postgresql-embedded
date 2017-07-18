@@ -11,7 +11,7 @@ import java.sql.Statement;
 
 public class TestMultipleInstance {
 	@Test
-	public void testRunTwoConsistentlyInstanceDifferenceVersions() throws Exception {
+	public void itShouldAllowToRunTwoInstancesWithDifferentVersions() throws Exception {
 		final EmbeddedPostgres postgres0 = new EmbeddedPostgres();
 		postgres0.start();
 		Assert.assertTrue(postgres0.getConnectionUrl().isPresent());
@@ -26,7 +26,7 @@ public class TestMultipleInstance {
 	}
 
 	@Test
-	public void testRunTwoInstanceAtOne() throws Exception {
+	public void itShouldAllowToRunTwoInstancesAtSameTime() throws Exception {
 		final EmbeddedPostgres postgres0 = new EmbeddedPostgres();
 		postgres0.start();
 		Assert.assertTrue(postgres0.getConnectionUrl().isPresent());
@@ -42,7 +42,7 @@ public class TestMultipleInstance {
 	}
 
 	@Test
-	public void testRunTwoInstanceAtOneDifferenceVersions() throws Exception {
+	public void itShouldAllowToRunTwoInstancesAtSameTimeAndWithDifferentVersions() throws Exception {
 		final EmbeddedPostgres postgres0 = new EmbeddedPostgres(Version.Main.V9_5);
 		postgres0.start();
 		Assert.assertTrue(postgres0.getConnectionUrl().isPresent());

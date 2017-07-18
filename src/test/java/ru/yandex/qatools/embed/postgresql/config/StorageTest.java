@@ -7,7 +7,7 @@ import ru.yandex.qatools.embed.postgresql.EmbeddedPostgres;
 public class StorageTest {
 
 	@Test
-	public void testTwoStorage() throws Exception {
+	public void itShouldAllowToMakeTwoStorageWithOneDatabaseName() throws Exception {
 		final AbstractPostgresConfig.Storage storage0 = new AbstractPostgresConfig.Storage(EmbeddedPostgres.DEFAULT_DB_NAME);
 		Assert.assertTrue(storage0.dbDir().exists());
 
