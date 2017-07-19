@@ -74,7 +74,7 @@ public class PostgresArtifactStore implements IMutableArtifactStore {
         try {
             final FileSet fileSet = packageResolver.getFileSet(distribution);
             return extractor.extract(downloadConfig, artifact,
-                    new PostgresFilesToExtract(tempDirFactory, executableNaming, fileSet));
+                    new PostgresFilesToExtract(tempDirFactory, executableNaming, fileSet, distribution));
         } catch (Exception e) {
             LOGGER.error("Failed to extract file set:", e);
             return new EmptyFileSet();
