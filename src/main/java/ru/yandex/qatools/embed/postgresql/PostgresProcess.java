@@ -60,6 +60,7 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
     private static Logger LOGGER = getLogger(PostgresProcess.class);
     private final IRuntimeConfig runtimeConfig;
 
+    private volatile boolean processReady = false;
     private volatile boolean stopped = false;
 
     public PostgresProcess(Distribution distribution, PostgresConfig config,
@@ -77,7 +78,7 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
                                  PostgresConfig config, IRuntimeConfig parentRuntimeCfg, Command cmd, String successOutput,
                                  Set<String> failOutput, String... args) {
         try {
-            LogWatchStreamProcessor logWatch = new LogWatchStreamProcessor(successOutput,
+            final LogWatchStreamProcessor logWatch = new LogWatchStreamProcessor(successOutput,
                     failOutput, new Slf4jStreamProcessor(LOGGER, Slf4jLevel.TRACE));
 
             IArtifactStore artifactStore = parentRuntimeCfg.getArtifactStore();
@@ -113,7 +114,7 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
             if (Command.InitDb == cmd) {
                 postgresConfig.withAdditionalInitDbParams(config.getAdditionalInitDbParams());
             }
-            Executable<?, ? extends AbstractPGProcess> exec = getCommand(cmd, runtimeCfg)
+            final Executable<?, ? extends AbstractPGProcess> exec = getCommand(cmd, runtimeCfg)
                     .prepare(postgresConfig);
             AbstractPGProcess proc = exec.start();
             logWatch.waitForResult(DEFAULT_CMD_TIMEOUT);
@@ -250,6 +251,7 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
                     new HashSet<>(singleton("database creation failed")), getConfig().storage().dbName());
             try {
                 if (isEmpty(output) || !output.contains("could not connect to database")) {
+                    this.processReady = true;
                     break;
                 }
                 LOGGER.warn("Could not create database first time ({} of {} trials)", trial, MAX_CREATEDB_TRIALS);
@@ -339,6 +341,10 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
                 "-f", file.getAbsolutePath(),
                 "-a"
         );
+    }
+
+    public boolean isProcessReady() {
+        return processReady;
     }
 
     @Override

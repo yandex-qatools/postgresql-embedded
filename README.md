@@ -19,14 +19,14 @@ Add the following dependency to your pom.xml:
 <dependency>
     <groupId>ru.yandex.qatools.embed</groupId>
     <artifactId>postgresql-embedded</artifactId>
-    <version>2.1</version>
+    <version>2.2</version>
 </dependency>
 ```
 ### Gradle
 
 Add a line to build.gradle:
 ```groovy
-compile 'ru.yandex.qatools.embed:postgresql-embedded:2.1'
+compile 'ru.yandex.qatools.embed:postgresql-embedded:2.2'
 ```
 
 ## Howto
@@ -97,7 +97,13 @@ Pass the required `IVersion` interface implementation as a first argument of the
 final EmbeddedPostgres postgres = new EmbeddedPostgres(() -> (IS_OS_WINDOWS) ? "9.6.2-2" : "9.6.2-1");
 ```
 
-### Important Notes
+### Known issues
+* A lot of issues have been reported for this library under Windows. Please try to use the suggested way of start up and use
+the cached artifact storage (to avoid extraction of the archive as extraction is extremely slow under Windows): 
+```java
+postgres.start(cachedRuntimeConfig("C:\\Users\\vasya\\pgembedded-installation"));
+```
+
 * PostgreSQL server is known to not start under the privileged user (which means you cannot start it under root/Administrator of your system):  
 
 > `initdb must be run as the user that will own the server process, because the server needs to have access to the files and directories that initdb creates. Since the server cannot be run as root, you must not run initdb as root either. (It will in fact refuse to do so.)` 
@@ -105,8 +111,6 @@ final EmbeddedPostgres postgres = new EmbeddedPostgres(() -> (IS_OS_WINDOWS) ? "
   
   However some users have launched it successfully on Windows under Administrator, so you can try anyway. 
   
-* It is no longer required to set up the LANG environment variable within your system, just pass that config as additionalInitDbParams.
-
 ### Supported Versions
 
 Versions: 9.6.2, 9.5.5, 9.4.10, any custom

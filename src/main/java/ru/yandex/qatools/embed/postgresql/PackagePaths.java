@@ -47,8 +47,8 @@ public class PackagePaths implements IPackageResolver {
         try {
             return FileSet.builder()
                     .addEntry(FileType.Executable, tempDir.asFile().getPath(),
-                            "^.*pgsql\\\\bin\\\\" + cmdPattern + "$")
-                    .addEntry(FileType.Executable, tempDir.asFile().getPath(),
+                            "^.*pgsql\\\\bin\\\\"+ cmdPattern+ "$")
+                                    .addEntry(FileType.Executable, tempDir.asFile().getPath(),
                             "^.*pgsql/bin/" + cmdPattern + "$")
                     .build();
         } catch (Exception e) {
