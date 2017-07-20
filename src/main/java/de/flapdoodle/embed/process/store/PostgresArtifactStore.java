@@ -22,7 +22,7 @@ import static org.apache.commons.io.FileUtils.deleteQuietly;
 
 /**
  * @author Ilya Sadykov
- *         Hacky ArtifactStore. Just to override the default FilesToExtract with PostgresFilesToExtract
+ * Hacky ArtifactStore. Just to override the default FilesToExtract with PostgresFilesToExtract
  */
 public class PostgresArtifactStore implements IMutableArtifactStore {
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresArtifactStore.class);
@@ -55,10 +55,8 @@ public class PostgresArtifactStore implements IMutableArtifactStore {
             LOGGER.trace("Could not delete executable NOW: {}", exe);
         }
 
-        if (all.baseDirIsGenerated()) {
-            if (!deleteQuietly(all.baseDir())) {
-                LOGGER.trace("Could not delete generatedBaseDir: {}", all.baseDir());
-            }
+        if (all.baseDirIsGenerated() && !deleteQuietly(all.baseDir())) {
+            LOGGER.trace("Could not delete generatedBaseDir: {}", all.baseDir());
         }
     }
 
