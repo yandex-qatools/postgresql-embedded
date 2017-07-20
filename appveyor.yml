@@ -26,13 +26,15 @@ install:
   - cmd: icacls %PROJ% /t /grant Everyone:(OI)(CI)F
   - cmd: icacls %SRC% /t /grant Everyone:(OI)(CI)F
   - cmd: cd %SRC%
-  - cmd: cpau.exe -profile -wait -outprocexit -u postgres -p %PASSWORD% -ex "whoami"
+  - cmd: .install-ssh.bat %PASSWORD%
+  - cmd: C:\cygwin64\bin
   - cmd: cpau.exe -profile -wait -outprocexit -u postgres -p %PASSWORD% -ex "cmd /c ""cd %SRC%&& dir""
 build_script:
   - runas /env /user:postgres cmd /c "cd %SRC%&& SET M2_HOME=%M2_HOME%&& %M2_HOME%\bin\mvn.bat clean install -B -DskipTests -Djna.nosys=true"
 test_script:
   - runas /env /user:postgres cmd /c "cd %SRC%&& SET M2_HOME=%M2_HOME%&& %M2_HOME%\bin\mvn.bat clean install -B -Djna.nosys=true"
 cache:
+  - C:\openssh\
   - C:\maven\
   - C:\Users\appveyor\.m2
   - C:\Users\postgres\.m2
