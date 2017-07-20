@@ -16,14 +16,14 @@ matrix:
       jdk: oraclejdk8
     - os: osx
       osx_image: xcode8
-    - dist: trusty
-      sudo: required
-      group: edge
-      jdk: oraclejdk9
-      addons:
-        apt:
-          packages:
-          - oracle-java9-installer
-      script:
-      - jdk_switcher use oraclejdk9
-      - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+#    - dist: trusty
+#      sudo: required
+#      group: edge
+#      jdk: oraclejdk9
+#      addons:
+#        apt:
+#          packages:
+#          - oracle-java9-installer
+#      script:
+#      - jdk_switcher use oraclejdk9
+#      - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
