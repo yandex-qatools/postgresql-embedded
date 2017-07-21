@@ -28,6 +28,8 @@ install:
   - cmd: ssh.exe -i "C:\Program Files\OpenSSH\etc\ssh_host_rsa_key" -oStrictHostKeyChecking=no postgres@localhost "env"
   - cmd: ssh.exe -i "C:\Program Files\OpenSSH\etc\ssh_host_rsa_key" -oStrictHostKeyChecking=no postgres@localhost "export PATH=%M2_HOME%/bin:\$PATH && pwd && which mvn"
   - cmd: ssh.exe -i "C:\Program Files\OpenSSH\etc\ssh_host_rsa_key" -oStrictHostKeyChecking=no postgres@localhost "export PATH=%M2_HOME%/bin:\$PATH && ls -la \$M3_HOME"
+  - cmd: ssh.exe -i "C:\Program Files\OpenSSH\etc\ssh_host_rsa_key" -oStrictHostKeyChecking=no postgres@localhost "which cmd"
+  - cmd: ssh.exe -i "C:\Program Files\OpenSSH\etc\ssh_host_rsa_key" -oStrictHostKeyChecking=no postgres@localhost "cmd /c whoami"
 build_script:
   - ssh.exe -i "C:\Program Files\OpenSSH\etc\ssh_host_rsa_key" -oStrictHostKeyChecking=no postgres@localhost "unset M2_HOME && unset MAVEN_HOME && export PATH=%M2_HOME%/bin:\$PATH && mvn clean install -B -DskipTests -Djna.nosys=true"
 test_script:
