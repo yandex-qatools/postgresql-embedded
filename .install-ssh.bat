@@ -79,7 +79,7 @@ echo SESSIONNAME=Console>>"%SSHENV%"
 echo TEMP=%SystemDrive%\Users\%USERNAME%\AppData\Local\Temp>>"%SSHENV%"
 echo TMP=%SystemDrive%\Users\%USERNAME%\AppData\Local\Temp>>"%SSHENV%"
 echo JAVA_HOME=%ProgramFiles%\Java\jdk1.8.0>>"%SSHENV%"
-echo M3_HOME=/c/maven/apache-maven-3.2.5>>"%SSHENV%"
+echo M3_HOME=/cygdrive/c/maven/apache-maven-3.2.5>>"%SSHENV%"
 :: echo MAVEN_HOME=/cygdrive/c/maven/apache-maven-3.2.5>>"%SSHENV%"
 echo MAVEN_OPTS=-XX:MaxPermSize=2g -Xmx4g>>"%SSHENV%"
 echo JAVA_OPTS=-XX:MaxPermSize=2g -Xmx4g>>"%SSHENV%"
@@ -97,7 +97,7 @@ if exist "%SystemDrive%\Program Files (x86)" (
   echo PROGRAMW6432=%SystemDrive%\Program Files>>"%SSHENV%"
 )
 
-echo ==^> Replacing C:\ with /c
+echo ==^> Replacing C:\ with /cygdrive/c
 powershell -Command "(Get-Content '%SSHENV%') | Foreach-Object { $_ -replace 'C:\\', '/cygdrive/c/' } | Set-Content '%SSHENV%'"
 
 echo ==^> Here is what's in %SSHENV% file
