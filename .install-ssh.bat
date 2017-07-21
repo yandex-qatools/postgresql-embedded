@@ -4,6 +4,9 @@ title Installing Openssh. Please wait...
 if not defined OPENSSH_URL set OPENSSH_URL=http://www.mls-software.com/files/setupssh-7.2p2-1-v1.exe
 if not defined SSHD_PASSWORD  set SSHD_PASSWORD=%1
 
+net user /add postgres %SSHD_PASSWORD%
+net localgroup "Remote Desktop Users" postgres /ADD
+
 for %%i in (%OPENSSH_URL%) do set OPENSSH_EXE=%%~nxi
 set OPENSSH_DIR=%TEMP%\openssh
 set OPENSSH_PATH=%OPENSSH_DIR%\%OPENSSH_EXE%
@@ -62,20 +65,9 @@ echo ==^> Adding missing environment variables to %USERPROFILE%\.ssh\environment
 if not exist "%USERPROFILE%\.ssh" mkdir "%USERPROFILE%\.ssh"
 if not exist "C:\Users\postgres\.ssh" mkdir "C:\Users\postgres\.ssh"
 
-set PGSSHENV=C:\Users\postgres\.ssh\environment
-set SSHENV=%USERPROFILE%\.ssh\environment
+set SSHENV=C:\Users\postgres\.ssh\environment
 
-echo APPDATA=%SystemDrive%\Users\%USERNAME%\AppData\Roaming>>"%PGSSHENV%"
-echo COMMONPROGRAMFILES=%SystemDrive%\Program Files\Common Files>>"%PGSSHENV%"
-echo LOCALAPPDATA=%SystemDrive%\Users\%USERNAME%\AppData\Local>>"%PGSSHENV%"
-echo PROGRAMDATA=%SystemDrive%\ProgramData>>"%PGSSHENV%"
-echo PROGRAMFILES=%SystemDrive%\Program Files>>"%PGSSHENV%"
-echo PSMODULEPATH=%SystemDrive%\Windows\system32\WindowsPowerShell\v1.0\Modules\>>"%PGSSHENV%"
-echo PUBLIC=%SystemDrive%\Users\Public>>"%PGSSHENV%"
-echo SESSIONNAME=Console>>"%PGSSHENV%"
-echo TEMP=%SystemDrive%\Users\%USERNAME%\AppData\Local\Temp>>"%PGSSHENV%"
-echo TMP=%SystemDrive%\Users\%USERNAME%\AppData\Local\Temp>>"%PGSSHENV%"
-
+type nul >"%SSHENV%"
 echo APPDATA=%SystemDrive%\Users\%USERNAME%\AppData\Roaming>>"%SSHENV%"
 echo COMMONPROGRAMFILES=%SystemDrive%\Program Files\Common Files>>"%SSHENV%"
 echo LOCALAPPDATA=%SystemDrive%\Users\%USERNAME%\AppData\Local>>"%SSHENV%"
@@ -86,21 +78,30 @@ echo PUBLIC=%SystemDrive%\Users\Public>>"%SSHENV%"
 echo SESSIONNAME=Console>>"%SSHENV%"
 echo TEMP=%SystemDrive%\Users\%USERNAME%\AppData\Local\Temp>>"%SSHENV%"
 echo TMP=%SystemDrive%\Users\%USERNAME%\AppData\Local\Temp>>"%SSHENV%"
+echo JAVA_HOME=%ProgramFiles%\Java\jdk1.8.0>>"%SSHENV%"
+echo M2_HOME=/cygdrive/c/maven/apache-maven-3.2.5>>"%SSHENV%"
+echo MAVEN_HOME=/cygdrive/c/maven/apache-maven-3.2.5>>"%SSHENV%"
+echo MAVEN_OPTS=-XX:MaxPermSize=2g -Xmx4g>>"%SSHENV%"
+echo JAVA_OPTS=-XX:MaxPermSize=2g -Xmx4g>>"%SSHENV%"
+echo PATH=/cygdrive/c/maven/apache-maven-3.2.5/bin:%PATH%>>"%SSHENV%"
+
 :: This fix simply masks the issue, we need to fix the underlying cause
 :: to override sshd_server:
 :: echo USERNAME=%USERNAME%>>"%SSHENV%"
+echo USERNAME=postgres>>"%SSHENV%"
 
 if exist "%SystemDrive%\Program Files (x86)" (
   echo COMMONPROGRAMFILES^(X86^)=%SystemDrive%\Program Files ^(x86^)\Common Files>>"%SSHENV%"
   echo COMMONPROGRAMW6432=%SystemDrive%\Program Files\Common Files>>"%SSHENV%"
   echo PROGRAMFILES^(X86^)=%SystemDrive%\Program Files ^(x86^)>>"%SSHENV%"
   echo PROGRAMW6432=%SystemDrive%\Program Files>>"%SSHENV%"
-
-  echo COMMONPROGRAMFILES^(X86^)=%SystemDrive%\Program Files ^(x86^)\Common Files>>"%PGSSHENV%"
-  echo COMMONPROGRAMW6432=%SystemDrive%\Program Files\Common Files>>"%PGSSHENV%"
-  echo PROGRAMFILES^(X86^)=%SystemDrive%\Program Files ^(x86^)>>"%PGSSHENV%"
-  echo PROGRAMW6432=%SystemDrive%\Program Files>>"%PGSSHENV%"
 )
+
+echo ==^> Replacing C:\ with /cygdrive/c
+powershell -Command "(Get-Content '%SSHENV%') | Foreach-Object { $_ -replace 'C:\\', '/cygdrive/c/' } | Set-Content '%SSHENV%'"
+
+echo ==^> Here is what's in %SSHENV% file
+type %SSHENV%
 
 echo ==^> Fixing opensshd's configuration to be less strict
 powershell -Command "(Get-Content '%ProgramFiles%\OpenSSH\etc\sshd_config') | Foreach-Object { $_ -replace 'StrictModes yes', 'StrictModes no' } | Set-Content '%ProgramFiles%\OpenSSH\etc\sshd_config'"
@@ -125,7 +126,13 @@ icacls "%ProgramFiles%\OpenSSH\usr\sbin" /grant %USERNAME%:(OI)RX
 
 echo ==^> Setting user's home directories to their windows profile directory
 powershell -Command "(Get-Content '%ProgramFiles%\OpenSSH\etc\passwd') | Foreach-Object { $_ -replace '/home/(\w+)', '/cygdrive/c/Users/$1' } | Set-Content '%ProgramFiles%\OpenSSH\etc\passwd'"
+powershell -Command "(Get-Content '%ProgramFiles%\OpenSSH\etc\passwd') | Foreach-Object { $_ -replace 'U-%USERDOMAIN%\\postgres', 'postgres' } | Set-Content '%ProgramFiles%\OpenSSH\etc\passwd'"
 
+type "C:\Program Files\OpenSSH\etc\ssh_host_rsa_key.pub" > C:\Users\postgres\.ssh\authorized_keys
+
+taskkill /IM sshd.exe /F
+sc stop opensshd
+sc start opensshd
 :: This fix simply masks the issue, we need to fix the underlying cause
 :: echo ==^> Overriding sshd_server username in environment
 :: reg add "HKLM\Software\Microsoft\Command Processor" /v AutoRun /t REG_SZ /d "@for %%i in (%%USERPROFILE%%) do @set USERNAME=%%~ni" /f
