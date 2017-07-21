@@ -19,22 +19,19 @@ install:
   - cmd: cd %SRC%
   - cmd: SET PASSWORD=zklDDH243765s
   - cmd: SET JAVA_HOME=C:\Program Files\Java\jdk1.8.0
-  - cmd: SET M2_HOME=/cygdrive/c/maven/apache-maven-3.2.5
+  - cmd: SET M2_HOME=C:\maven\apache-maven-3.2.5
   - cmd: icacls C:\maven /t /grant Everyone:(OI)(CI)F
   - cmd: SET MAVEN_OPTS=-XX:MaxPermSize=2g -Xmx4g
   - cmd: SET JAVA_OPTS=-XX:MaxPermSize=2g -Xmx4g
   - cmd: .\.install-ssh.bat %PASSWORD%
   - cmd: SET PATH=C:\maven\apache-maven-3.2.5\bin;%JAVA_HOME%\bin;C:\Program Files\OpenSSH\bin;%PATH%
   - cmd: SET RSAKEY=C:\Program Files\OpenSSH\etc\ssh_host_rsa_key
-  - cmd: ssh.exe -i "%RSAKEY%" -oStrictHostKeyChecking=no postgres@localhost "env"
-  - cmd: ssh.exe -i "%RSAKEY%" -oStrictHostKeyChecking=no postgres@localhost "export PATH=%M2_HOME%/bin:\$PATH && pwd && which mvn"
-  - cmd: ssh.exe -i "%RSAKEY%" -oStrictHostKeyChecking=no postgres@localhost "export PATH=%M2_HOME%/bin:\$PATH && ls -la \$M3_HOME"
-  - cmd: ssh.exe -i "%RSAKEY%" -oStrictHostKeyChecking=no postgres@localhost "which cmd"
   - cmd: ssh.exe -i "%RSAKEY%" -oStrictHostKeyChecking=no postgres@localhost "cmd /c SET"
+  - cmd: ssh.exe -i "%RSAKEY%" -oStrictHostKeyChecking=no postgres@localhost cmd /c "SET PATH=%M2_HOME%\bin;%%PATH%% & SET"
 build_script:
-  - ssh.exe -i "%RSAKEY%" -oStrictHostKeyChecking=no postgres@localhost "unset M2_HOME && unset MAVEN_HOME && export PATH=%M2_HOME%/bin:\$PATH && mvn clean install -B -DskipTests -Djna.nosys=true"
+  - ssh.exe -i "%RSAKEY%" -oStrictHostKeyChecking=no postgres@localhost cmd /c "SET PATH=%M2_HOME%\bin;%%PATH%% & mvn clean install -B -DskipTests -Djna.nosys=true"
 test_script:
-  - ssh.exe -i "%RSAKEY%" -oStrictHostKeyChecking=no postgres@localhost "unset M2_HOME && unset MAVEN_HOME && export PATH=%M2_HOME%/bin:\$PATH && mvn clean install -B -Djna.nosys=true"
+  - ssh.exe -i "%RSAKEY%" -oStrictHostKeyChecking=no postgres@localhost cmd /c "SET PATH=%M2_HOME%\bin;%%PATH%% & mvn clean install -B -Djna.nosys=true"
 cache:
   - C:\openssh\
   - C:\maven\
