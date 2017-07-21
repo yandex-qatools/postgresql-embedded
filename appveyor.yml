@@ -25,13 +25,13 @@ install:
   - cmd: .\.install-ssh.bat %PASSWORD%
   - cmd: SET PATH=C:\maven\apache-maven-3.2.5\bin;%JAVA_HOME%\bin;C:\Program Files\OpenSSH\bin;%PATH%
   - cmd: ssh.exe -i "C:\Program Files\OpenSSH\etc\ssh_host_rsa_key" -oStrictHostKeyChecking=no postgres@localhost "echo \$PATH"
-  - cmd: ssh.exe -i "C:\Program Files\OpenSSH\etc\ssh_host_rsa_key" -oStrictHostKeyChecking=no postgres@localhost "/bin/env"
+  - cmd: ssh.exe -i "C:\Program Files\OpenSSH\etc\ssh_host_rsa_key" -oStrictHostKeyChecking=no postgres@localhost "env"
   - cmd: ssh.exe -i "C:\Program Files\OpenSSH\etc\ssh_host_rsa_key" -oStrictHostKeyChecking=no postgres@localhost "pwd && which mvn"
   - cmd: ssh.exe -i "C:\Program Files\OpenSSH\etc\ssh_host_rsa_key" -oStrictHostKeyChecking=no postgres@localhost "ls -la \$M2_HOME"
 build_script:
-  - ssh.exe -i "C:\Program Files\OpenSSH\etc\ssh_host_rsa_key" -oStrictHostKeyChecking=no postgres@localhost "%M2_HOME%/bin/mvn clean install -B -DskipTests -Djna.nosys=true"
+  - ssh.exe -i "C:\Program Files\OpenSSH\etc\ssh_host_rsa_key" -oStrictHostKeyChecking=no postgres@localhost "export PATH=%M2_HOME%/bin:\$PATH && mvn clean install -B -DskipTests -Djna.nosys=true"
 test_script:
-  - ssh.exe -i "C:\Program Files\OpenSSH\etc\ssh_host_rsa_key" -oStrictHostKeyChecking=no postgres@localhost "%M2_HOME%/bin/mvn clean install -B -Djna.nosys=true"
+  - ssh.exe -i "C:\Program Files\OpenSSH\etc\ssh_host_rsa_key" -oStrictHostKeyChecking=no postgres@localhost "export PATH=%M2_HOME%/bin:\$PATH && mvn clean install -B -Djna.nosys=true"
 cache:
   - C:\openssh\
   - C:\maven\
