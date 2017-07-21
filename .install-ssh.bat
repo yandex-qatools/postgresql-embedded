@@ -83,7 +83,7 @@ echo M2_HOME=/cygdrive/c/maven/apache-maven-3.2.5>>"%SSHENV%"
 echo MAVEN_HOME=/cygdrive/c/maven/apache-maven-3.2.5>>"%SSHENV%"
 echo MAVEN_OPTS=-XX:MaxPermSize=2g -Xmx4g>>"%SSHENV%"
 echo JAVA_OPTS=-XX:MaxPermSize=2g -Xmx4g>>"%SSHENV%"
-echo PATH=/cygdrive/c/maven/apache-maven-3.2.5/bin:%PATH%>>"%SSHENV%"
+:: echo PATH=/cygdrive/c/maven/apache-maven-3.2.5/bin:%PATH%>>"%SSHENV%"
 
 :: This fix simply masks the issue, we need to fix the underlying cause
 :: to override sshd_server:
