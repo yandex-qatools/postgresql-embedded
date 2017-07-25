@@ -33,6 +33,7 @@ public class EmbeddedPostgres {
             "--locale=C",
             "--lc-collate=C",
             "--lc-ctype=C");
+    private final String dataDir;
     private final IVersion version;
     private PostgresProcess process;
     private PostgresConfig config;
@@ -42,7 +43,16 @@ public class EmbeddedPostgres {
     }
 
     public EmbeddedPostgres(IVersion version) {
+        this(version, null);
+    }
+
+    public EmbeddedPostgres(String dataDir){
+        this(PRODUCTION, dataDir);
+    }
+
+    public EmbeddedPostgres(IVersion version, String dataDir){
         this.version = version;
+        this.dataDir = dataDir;
     }
 
     /**
@@ -121,7 +131,7 @@ public class EmbeddedPostgres {
         final PostgresStarter<PostgresExecutable, PostgresProcess> runtime = PostgresStarter.getInstance(runtimeConfig);
         config = new PostgresConfig(version,
                 new AbstractPostgresConfig.Net(host, port),
-                new AbstractPostgresConfig.Storage(dbName),
+                new AbstractPostgresConfig.Storage(dbName, dataDir),
                 new AbstractPostgresConfig.Timeout(),
                 new AbstractPostgresConfig.Credentials(user, password)
         );

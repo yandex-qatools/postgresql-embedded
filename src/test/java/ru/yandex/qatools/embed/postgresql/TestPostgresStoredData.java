@@ -1,6 +1,9 @@
 package ru.yandex.qatools.embed.postgresql;
 
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.FixMethodOrder;
+import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import ru.yandex.qatools.embed.postgresql.config.AbstractPostgresConfig;
 import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
@@ -33,7 +36,7 @@ public class TestPostgresStoredData {
 	}
 
 	@Test
-	public void test0() throws Exception {
+	public void testStep0() throws Exception {
 		final PostgresProcess process = buildProcess(baseDir);
 		Assert.assertTrue(process.getConfig().storage().dbDir().exists());
 		Connection connection = DriverManager.getConnection(formatConnUrl(process.getConfig()));
@@ -43,12 +46,59 @@ public class TestPostgresStoredData {
 	}
 
 	@Test
-	public void test1() throws Exception {
+	public void testStep1() throws Exception {
 		final PostgresProcess process = buildProcess(baseDir);
 		Assert.assertTrue(process.getConfig().storage().dbDir().exists());
 		Connection connection = DriverManager.getConnection(formatConnUrl(process.getConfig()));
 		checkRecords(connection);
 		process.stop();
+	}
+
+	@Test
+	public void testStep2() throws Exception {
+		final EmbeddedPostgres embeddedPostgres = new EmbeddedPostgres(baseDir.getAbsolutePath());
+		final String           jdbcUrl          = embeddedPostgres.start();
+		try (Connection connection = DriverManager.getConnection(jdbcUrl)) {
+			checkRecords(connection);
+		} finally {
+			embeddedPostgres.stop();
+		}
+	}
+
+	@Test
+	public void testIndependent() throws Exception {
+		final String dataDir = Files.createTempDirectory("data").toFile().getAbsolutePath();
+
+		{
+			final EmbeddedPostgres embeddedPostgres = new EmbeddedPostgres(dataDir);
+			final String           jdbcUrl          = embeddedPostgres.start();
+			try (Connection connection = DriverManager.getConnection(jdbcUrl)) {
+				initSchema(connection);
+				checkRecords(connection);
+			} finally {
+				embeddedPostgres.stop();
+			}
+		}
+		{
+			final EmbeddedPostgres embeddedPostgres = new EmbeddedPostgres(dataDir);
+			final String           jdbcUrl          = embeddedPostgres.start();
+			try (Connection connection = DriverManager.getConnection(jdbcUrl)) {
+				checkRecords(connection);
+			} finally {
+				embeddedPostgres.stop();
+			}
+		}
+	}
+
+	@Test
+	public void testStep3() throws Exception {
+		final EmbeddedPostgres embeddedPostgres = new EmbeddedPostgres(Version.Main.PRODUCTION, baseDir.getAbsolutePath());
+		final String           jdbcUrl          = embeddedPostgres.start();
+		try (Connection connection = DriverManager.getConnection(jdbcUrl)) {
+			checkRecords(connection);
+		} finally {
+			embeddedPostgres.stop();
+		}
 	}
 
 	private void initSchema(Connection conn) throws SQLException {
