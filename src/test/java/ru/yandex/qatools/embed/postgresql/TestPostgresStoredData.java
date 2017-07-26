@@ -58,6 +58,7 @@ public class TestPostgresStoredData {
 		final EmbeddedPostgres embeddedPostgres = new EmbeddedPostgres(baseDir.getAbsolutePath());
 		final String           jdbcUrl          = embeddedPostgres.start();
 		try (Connection connection = DriverManager.getConnection(jdbcUrl)) {
+			initSchema(connection);
 			checkRecords(connection);
 		} finally {
 			embeddedPostgres.stop();
