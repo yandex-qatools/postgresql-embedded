@@ -27,9 +27,9 @@ install:
   - cmd: SET PATH=C:\maven\apache-maven-3.2.5\bin;%JAVA_HOME%\bin;C:\Program Files\OpenSSH\bin;%PATH%
   - cmd: SET RSAKEY=C:\Program Files\OpenSSH\etc\ssh_host_rsa_key
 build_script:
-  - ssh.exe -i "%RSAKEY%" -oStrictHostKeyChecking=no postgres@localhost "cd ~/src && cmd /c .appveyor-run-mvn.bat clean install -B -DskipTests -Djna.nosys=true"
+  - ssh.exe -i "%RSAKEY%" -oStrictHostKeyChecking=no postgres@localhost "cd ~/src && cmd /c .appveyor-run-mvn.bat clean install -B -DskipTests -Djna.nosys=true" & exit %ERRORLEVEL%
 test_script:
-  - ssh.exe -i "%RSAKEY%" -oStrictHostKeyChecking=no postgres@localhost "cd ~/src && cmd /c .appveyor-run-mvn.bat clean install -B -Djna.nosys=true"
+  - ssh.exe -i "%RSAKEY%" -oStrictHostKeyChecking=no postgres@localhost "cd ~/src && cmd /c .appveyor-run-mvn.bat clean install -B -Djna.nosys=true" & exit %ERRORLEVEL%
 cache:
   - C:\openssh\
   - C:\maven\
