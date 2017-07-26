@@ -35,6 +35,8 @@ Here is the example of how to launch and use the embedded PostgreSQL instance
 ```java
 // starting Postgres
 final EmbeddedPostgres postgres = new EmbeddedPostgres(V9_6);
+// predefined data directory
+// final EmbeddedPostgres postgres = new EmbeddedPostgres(V9_6, "/path/to/predefined/data/directory");
 final String url = postgres.start("localhost", 5432, "dbName", "userName", "password");
 
 // connecting to a running Postgres and feeding up the database
