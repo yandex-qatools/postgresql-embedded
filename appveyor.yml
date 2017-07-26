@@ -10,15 +10,28 @@ install:
         )
         [System.IO.Compression.ZipFile]::ExtractToDirectory("C:\maven-bin.zip", "C:\maven")
       }
+  - cmd: SET PROJ=C:\Users\postgres
+  - cmd: SET SRC=%PROJ%\src
+  - cmd: mkdir %SRC%
+  - cmd: xcopy /s %CD% %SRC%
+  - cmd: icacls %PROJ% /t /grant Everyone:(OI)(CI)F
+  - cmd: icacls %SRC% /t /grant Everyone:(OI)(CI)F
+  - cmd: cd %SRC%
+  - cmd: SET PASSWORD=zklDDH243765s
   - cmd: SET JAVA_HOME=C:\Program Files\Java\jdk1.8.0
-  - cmd: SET PATH=C:\maven\apache-maven-3.2.5\bin;%JAVA_HOME%\bin;%PATH%
   - cmd: SET M2_HOME=C:\maven\apache-maven-3.2.5
+  - cmd: icacls C:\maven /t /grant Everyone:(OI)(CI)F
   - cmd: SET MAVEN_OPTS=-XX:MaxPermSize=2g -Xmx4g
   - cmd: SET JAVA_OPTS=-XX:MaxPermSize=2g -Xmx4g
+  - cmd: .\.appveyor-install-ssh.bat %PASSWORD%
+  - cmd: SET PATH=C:\maven\apache-maven-3.2.5\bin;%JAVA_HOME%\bin;C:\Program Files\OpenSSH\bin;%PATH%
+  - cmd: SET RSAKEY=C:\Program Files\OpenSSH\etc\ssh_host_rsa_key
 build_script:
-  - mvn clean package --batch-mode -DskipTests -Djna.nosys=true
+  - ssh.exe -i "%RSAKEY%" -oStrictHostKeyChecking=no postgres@localhost "cd ~/src && cmd /c .appveyor-run-mvn.bat clean install -B -DskipTests -Djna.nosys=true"
 test_script:
-  - psexec -i -l cmd /c "C:\maven\apache-maven-3.2.5\bin\mvn.bat clean install --batch-mode -Djna.nosys=true"
+  - ssh.exe -i "%RSAKEY%" -oStrictHostKeyChecking=no postgres@localhost "cd ~/src && cmd /c .appveyor-run-mvn.bat clean install -B -Djna.nosys=true"
 cache:
+  - C:\openssh\
   - C:\maven\
   - C:\Users\appveyor\.m2
+  - C:\Users\postgres\.m2
