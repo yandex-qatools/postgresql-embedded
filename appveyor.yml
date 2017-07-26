@@ -26,12 +26,10 @@ install:
   - cmd: .\.install-ssh.bat %PASSWORD%
   - cmd: SET PATH=C:\maven\apache-maven-3.2.5\bin;%JAVA_HOME%\bin;C:\Program Files\OpenSSH\bin;%PATH%
   - cmd: SET RSAKEY=C:\Program Files\OpenSSH\etc\ssh_host_rsa_key
-  - cmd: ssh.exe -i "%RSAKEY%" -oStrictHostKeyChecking=no postgres@localhost env
-  - cmd: ssh.exe -i "%RSAKEY%" -oStrictHostKeyChecking=no postgres@localhost "cd ~/src && cmd /c .run-mvn.bat"
 build_script:
-  - ssh.exe -i "%RSAKEY%" -oStrictHostKeyChecking=no postgres@localhost "cd ~/src && unset M2_HOME && \$M3_HOME/bin/mvn clean install -B -DskipTests -Djna.nosys=true"
+  - ssh.exe -i "%RSAKEY%" -oStrictHostKeyChecking=no postgres@localhost "cd ~/src && cmd /c .run-mvn.bat clean install -B -DskipTests -Djna.nosys=true"
 test_script:
-  - ssh.exe -i "%RSAKEY%" -oStrictHostKeyChecking=no postgres@localhost "cd ~/src && unset M2_HOME && \$M3_HOME/bin/mvn clean install -B -Djna.nosys=true"
+  - ssh.exe -i "%RSAKEY%" -oStrictHostKeyChecking=no postgres@localhost "cd ~/src && cmd /c .run-mvn.bat clean install -B -Djna.nosys=true"
 cache:
   - C:\openssh\
   - C:\maven\
