@@ -13,15 +13,15 @@ import de.flapdoodle.embed.process.runtime.Executable;
 import de.flapdoodle.embed.process.runtime.ProcessControl;
 import de.flapdoodle.embed.process.store.IArtifactStore;
 import de.flapdoodle.embed.process.store.IMutableArtifactStore;
+import de.flapdoodle.embed.process.store.PostgresArtifactStore;
+import de.flapdoodle.embed.process.store.PostgresArtifactStoreBuilder;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
-import ru.yandex.qatools.embed.postgresql.config.PostgresDownloadConfigBuilder;
 import ru.yandex.qatools.embed.postgresql.config.IMutableDownloadConfig;
 import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
+import ru.yandex.qatools.embed.postgresql.config.PostgresDownloadConfigBuilder;
 import ru.yandex.qatools.embed.postgresql.config.RuntimeConfigBuilder;
-import de.flapdoodle.embed.process.store.PostgresArtifactStoreBuilder;
 import ru.yandex.qatools.embed.postgresql.ext.LogWatchStreamProcessor;
-import de.flapdoodle.embed.process.store.PostgresArtifactStore;
 import ru.yandex.qatools.embed.postgresql.ext.SubdirTempDir;
 
 import java.io.File;
@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -38,6 +37,7 @@ import static de.flapdoodle.embed.process.io.file.Files.forceDelete;
 import static java.lang.System.currentTimeMillis;
 import static java.lang.Thread.sleep;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.apache.commons.io.FileUtils.readLines;
@@ -55,12 +55,13 @@ import static ru.yandex.qatools.embed.postgresql.config.AbstractPostgresConfig.S
  * postgres process
  */
 public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, PostgresProcess> {
-    public static final int MAX_CREATEDB_TRIALS = 3;
+    private static final int MAX_CREATEDB_TRIALS = 3;
+    private static final int DEFAULT_CMD_TIMEOUT = 2000;
     private static Logger LOGGER = getLogger(PostgresProcess.class);
     private final IRuntimeConfig runtimeConfig;
 
-    volatile boolean processReady = false;
-    boolean stopped = false;
+    private volatile boolean processReady = false;
+    private volatile boolean stopped = false;
 
     public PostgresProcess(Distribution distribution, PostgresConfig config,
                            IRuntimeConfig runtimeConfig, PostgresExecutable executable) throws IOException {
@@ -68,26 +69,19 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
         this.runtimeConfig = runtimeConfig;
     }
 
-    /**
-     * @deprecated consider using {@link #stop()} method instead
-     */
-    @Deprecated
-    public static boolean shutdownPostgres(PostgresConfig config) {
-        return shutdownPostgres(config, new RuntimeConfigBuilder().defaults(Command.PgCtl).build());
+    private static String runCmd(PostgresConfig config, IRuntimeConfig parentRuntimeCfg, Command cmd, String successOutput,
+                                 Set<String> failOutput, String... args) {
+        return runCmd(false, config, parentRuntimeCfg, cmd, successOutput, failOutput, args);
     }
 
-    private static String runCmd(
-            PostgresConfig config, IRuntimeConfig runtimeConfig, Command cmd, String successOutput, int timeout, String... args) {
-        return runCmd(config, runtimeConfig, cmd, successOutput, Collections.<String>emptySet(), timeout, args);
-    }
-
-    private static String runCmd(
-            PostgresConfig config, IRuntimeConfig runtimeConfig, Command cmd, String successOutput, Set<String> failOutput, long timeout, String... args) {
+    private static String runCmd(boolean silent,
+                                 PostgresConfig config, IRuntimeConfig parentRuntimeCfg, Command cmd, String successOutput,
+                                 Set<String> failOutput, String... args) {
         try {
             final LogWatchStreamProcessor logWatch = new LogWatchStreamProcessor(successOutput,
                     failOutput, new Slf4jStreamProcessor(LOGGER, Slf4jLevel.TRACE));
 
-            IArtifactStore artifactStore = runtimeConfig.getArtifactStore();
+            IArtifactStore artifactStore = parentRuntimeCfg.getArtifactStore();
             IDownloadConfig downloadCfg = ((PostgresArtifactStore) artifactStore).getDownloadConfig();
 
             if (downloadCfg instanceof IMutableDownloadConfig) {
@@ -111,9 +105,10 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
             }
 
             final IRuntimeConfig runtimeCfg = new RuntimeConfigBuilder().defaults(cmd)
+                    .daemonProcess(false)
                     .processOutput(new ProcessOutput(logWatch, logWatch, logWatch))
                     .artifactStore(artifactStore)
-                    .commandLinePostProcessor(runtimeConfig.getCommandLinePostProcessor()).build();
+                    .commandLinePostProcessor(parentRuntimeCfg.getCommandLinePostProcessor()).build();
 
             final PostgresConfig postgresConfig = new PostgresConfig(config).withArgs(args);
             if (Command.InitDb == cmd) {
@@ -122,42 +117,42 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
             final Executable<?, ? extends AbstractPGProcess> exec = getCommand(cmd, runtimeCfg)
                     .prepare(postgresConfig);
             AbstractPGProcess proc = exec.start();
-            logWatch.waitForResult(timeout);
+            logWatch.waitForResult(DEFAULT_CMD_TIMEOUT);
             proc.waitFor();
             return logWatch.getOutput();
         } catch (IOException | InterruptedException e) {
-            LOGGER.warn("Failed to run command {}", cmd.commandName(), e);
+            if (!silent) {
+                LOGGER.warn("Failed to run command {}", cmd.commandName(), e);
+            }
         }
         return null;
     }
 
     private static boolean shutdownPostgres(PostgresConfig config, IRuntimeConfig runtimeConfig) {
         try {
-            return isEmpty(runCmd(config, runtimeConfig, Command.PgCtl, "server stopped", 2000, "stop"));
+            return isEmpty(runCmd(true, config, runtimeConfig, Command.PgCtl, "server stopped", emptySet(), "stop"));
         } catch (Exception e) {
-            LOGGER.warn("Failed to stop postgres by pg_ctl!", e);
+            LOGGER.trace("Failed to stop postgres by pg_ctl!", e);
         }
         return false;
     }
 
     @Override
-    protected void stopInternal() {
-        synchronized (this) {
-            if (!stopped) {
-                stopped = true;
-                LOGGER.info("trying to stop postgresql");
-                if (!sendStopToPostgresqlInstance() && !sendTermToProcess() && waitUntilProcessHasStopped(2000)) {
-                    LOGGER.warn("could not stop postgresql with pg_ctl/SIGTERM, trying to kill it...");
-                    if (!sendKillToProcess() && !tryKillToProcess() && waitUntilProcessHasStopped(3000)) {
-                        LOGGER.warn("could not kill postgresql within 4s!");
-                    }
+    protected synchronized void stopInternal() {
+        if (!stopped && isProcessRunning()) {
+            stopped = true;
+            LOGGER.info("trying to stop postgresql");
+            if (!sendStopToPostgresqlInstance() && !sendTermToProcess() && waitUntilProcessHasStopped(2000)) {
+                LOGGER.warn("could not stop postgresql with pg_ctl/SIGTERM, trying to kill it...");
+                if (!sendKillToProcess() && !tryKillToProcess() && waitUntilProcessHasStopped(3000)) {
+                    LOGGER.warn("could not kill postgresql within 4s!");
                 }
             }
-            if (waitUntilProcessHasStopped(5000)) {
-                LOGGER.error("Postgres has not been stopped within 10s! Something's wrong!");
-            }
-            deleteTempFiles();
         }
+        if (waitUntilProcessHasStopped(5000)) {
+            LOGGER.error("Postgres has not been stopped within 10s! Something's wrong!");
+        }
+        deleteTempFiles();
     }
 
     private boolean waitUntilProcessHasStopped(int timeoutMillis) {
@@ -195,7 +190,8 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
             return;
         }
 
-        runCmd(config, runtimeConfig, InitDb, "Success. You can now start the database server using", 1000);
+        runCmd(config, runtimeConfig, InitDb,
+                "Success. You can now start the database server using", emptySet());
     }
 
     @Override
@@ -271,7 +267,6 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
                                    CreateDb,
                                    "",
                                    new HashSet<>(singleton("database creation failed")),
-                                   3000,
                                    storage.dbName());
             try {
                 if (isEmpty(output) || !output.contains("could not connect to database")) {
@@ -310,7 +305,7 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
             if (cliArgs != null && cliArgs.length != 0) {
                 args = ArrayUtils.addAll(args, cliArgs);
             }
-            runCmd(getConfig(), runtimeConfig, Psql, "", new HashSet<>(singletonList("import into " + getConfig().storage().dbName() + " failed")), 1000, args);
+            runCmd(getConfig(), runtimeConfig, Psql, "", new HashSet<>(singletonList("import into " + getConfig().storage().dbName() + " failed")), args);
         }
     }
 
@@ -331,13 +326,12 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
             if (cliArgs != null && cliArgs.length != 0) {
                 args = ArrayUtils.addAll(args, cliArgs);
             }
-            runCmd(getConfig(), runtimeConfig, PgRestore, "", new HashSet<>(singletonList("restore into " + getConfig().storage().dbName() + " failed")), 1000, args);
+            runCmd(getConfig(), runtimeConfig, PgRestore, "", new HashSet<>(singletonList("restore into " + getConfig().storage().dbName() + " failed")), args);
         }
     }
 
     public void exportToFile(File file) {
         runCmd(getConfig(), runtimeConfig, PgDump, "", new HashSet<>(singletonList("export from " + getConfig().storage().dbName() + " failed")),
-                1000,
                 "-U", getConfig().credentials().username(),
                 "-d", getConfig().storage().dbName(),
                 "-h", getConfig().net().host(),
@@ -348,7 +342,6 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
 
     public void exportSchemeToFile(File file) {
         runCmd(getConfig(), runtimeConfig, PgDump, "", new HashSet<>(singletonList("export from " + getConfig().storage().dbName() + " failed")),
-                1000,
                 "-U", getConfig().credentials().username(),
                 "-d", getConfig().storage().dbName(),
                 "-h", getConfig().net().host(),
@@ -360,7 +353,6 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
 
     public void exportDataToFile(File file) {
         runCmd(getConfig(), runtimeConfig, PgDump, "", new HashSet<>(singletonList("export from " + getConfig().storage().dbName() + " failed")),
-                1000,
                 "-U", getConfig().credentials().username(),
                 "-d", getConfig().storage().dbName(),
                 "-h", getConfig().net().host(),

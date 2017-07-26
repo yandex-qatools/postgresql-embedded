@@ -5,16 +5,19 @@ import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.distribution.IVersion;
 import de.flapdoodle.embed.process.distribution.Platform;
 import de.flapdoodle.embed.process.store.IArtifactStore;
-import junit.framework.TestCase;
-import ru.yandex.qatools.embed.postgresql.distribution.Version;
 import de.flapdoodle.embed.process.store.PostgresArtifactStoreBuilder;
+import org.junit.Test;
+import ru.yandex.qatools.embed.postgresql.distribution.Version;
 
 import java.io.IOException;
 
 import static java.util.Arrays.asList;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
-public class TestDownloads extends TestCase {
+public class TestDownloads {
 
+    @Test
     public void testDownloads() throws IOException {
         IArtifactStore artifactStore = new PostgresArtifactStoreBuilder().defaults(Command.Postgres).build();
 
@@ -22,7 +25,7 @@ public class TestDownloads extends TestCase {
             for (BitSize b : BitSize.values()) {
                 for (IVersion version : Version.Main.values()) {
                     Distribution distribution = new Distribution(version, p, b);
-                    assertTrue("Distribution: " + distribution, artifactStore.checkDistribution(distribution));
+                    assertThat("Distribution: " + distribution + " should be accessible", artifactStore.checkDistribution(distribution), is(true));
                 }
             }
         }

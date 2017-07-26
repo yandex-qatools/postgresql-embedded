@@ -8,8 +8,6 @@ import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.distribution.IVersion;
 import de.flapdoodle.embed.process.io.directories.IDirectory;
 
-import java.nio.file.Paths;
-
 /**
  * Paths builder
  */
@@ -49,7 +47,9 @@ public class PackagePaths implements IPackageResolver {
         try {
             return FileSet.builder()
                     .addEntry(FileType.Executable, tempDir.asFile().getPath(),
-                            "^.*" + Paths.get("pgsql", "bin", cmdPattern).toString().replace("\\", "\\\\") + "$")
+                            "^.*pgsql\\\\bin\\\\"+ cmdPattern+ "$")
+                                    .addEntry(FileType.Executable, tempDir.asFile().getPath(),
+                            "^.*pgsql/bin/" + cmdPattern + "$")
                     .build();
         } catch (Exception e) {
             throw new RuntimeException(e);

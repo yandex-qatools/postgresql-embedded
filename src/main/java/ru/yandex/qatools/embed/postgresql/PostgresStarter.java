@@ -7,6 +7,8 @@ import de.flapdoodle.embed.process.extract.IExtractedFileSet;
 import de.flapdoodle.embed.process.io.Slf4jLevel;
 import de.flapdoodle.embed.process.io.Slf4jStreamProcessor;
 import de.flapdoodle.embed.process.runtime.Starter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
 import ru.yandex.qatools.embed.postgresql.config.RuntimeConfigBuilder;
 import ru.yandex.qatools.embed.postgresql.ext.LogWatchStreamProcessor;
@@ -23,6 +25,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 public class PostgresStarter<E extends AbstractPGExecutable<PostgresConfig, P>, P extends AbstractPGProcess<E, P>>
         extends Starter<PostgresConfig, E, P> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PostgresStarter.class);
     final Class<E> execClass;
 
     public PostgresStarter(final Class<E> execClass, final IRuntimeConfig runtimeConfig) {
@@ -67,7 +70,8 @@ public class PostgresStarter<E extends AbstractPGExecutable<PostgresConfig, P>, 
             );
             return c.newInstance(distribution, config, runtime, exe);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to initialize the executable", e);
+            LOGGER.warn("Exception while trying to create executable", e);
+            throw new RuntimeException("Failed to initialize the executable (" + e.getMessage() + ")", e);
         }
     }
 }

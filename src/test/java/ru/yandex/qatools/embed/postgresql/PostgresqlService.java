@@ -1,17 +1,16 @@
 package ru.yandex.qatools.embed.postgresql;
 
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
-import ru.yandex.qatools.embed.postgresql.config.AbstractPostgresConfig;
-import ru.yandex.qatools.embed.postgresql.config.PostgresDownloadConfigBuilder;
-import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
-import ru.yandex.qatools.embed.postgresql.config.RuntimeConfigBuilder;
 import de.flapdoodle.embed.process.store.PostgresArtifactStoreBuilder;
+import ru.yandex.qatools.embed.postgresql.config.AbstractPostgresConfig;
+import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
+import ru.yandex.qatools.embed.postgresql.config.PostgresDownloadConfigBuilder;
+import ru.yandex.qatools.embed.postgresql.config.RuntimeConfigBuilder;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 
 import static java.lang.String.format;
-import static java.lang.Thread.sleep;
 import static java.util.Arrays.asList;
 import static ru.yandex.qatools.embed.postgresql.distribution.Version.Main.PRODUCTION;
 import static ru.yandex.qatools.embed.postgresql.util.SocketUtil.findFreePort;
@@ -45,9 +44,6 @@ public class PostgresqlService {
         ));
         PostgresExecutable exec = runtime.prepare(config);
         process = exec.start();
-        for (int trial = 0; trial < 10 && !process.isProcessReady(); ++trial) {
-            sleep(100);
-        }
         String url = format("jdbc:postgresql://%s:%s/%s?user=%s&password=%s",
                 config.net().host(),
                 config.net().port(),
@@ -58,11 +54,7 @@ public class PostgresqlService {
         conn = DriverManager.getConnection(url);
     }
 
-    public PostgresProcess getProcess() {
-        return process;
-    }
-
-    public Connection getConn() {
+    Connection getConn() {
         return conn;
     }
 
