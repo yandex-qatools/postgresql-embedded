@@ -1,7 +1,7 @@
 # Embedded PostgreSQL Server
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/ru.yandex.qatools.embed/postgresql-embedded/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/ru.yandex.qatools.embed/postgresql-embedded)
 [![Build status](https://travis-ci.org/yandex-qatools/postgresql-embedded.svg?branch=master)](https://travis-ci.org/yandex-qatools/postgresql-embedded/)
-[![covarage](https://img.shields.io/sonar/http/sonar.qatools.ru/ru.yandex.qatools.embed:postgresql-embedded/coverage.svg?style=flat)](http://sonar.qatools.ru/dashboard/index/784)
+[![Windows build status](https://ci.appveyor.com/api/projects/status/00ov87k6fe2euwvo?svg=true)](https://ci.appveyor.com/project/smecsia/postgresql-embedded)
 
 Embedded PostgreSQL server provides a platform neutral way for running postgres binaries in unittests.
 This library is based on [Flapdoodle OSS's embed process](https://github.com/flapdoodle-oss/de.flapdoodle.embed.process). 
