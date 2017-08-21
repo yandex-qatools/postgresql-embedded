@@ -46,12 +46,10 @@ public class CachedPostgresArtifactStore extends PostgresArtifactStore {
             final File dir = this.eDir.asFile();
             final FileSet filesSet = downloadConfig.getPackageResolver().getFileSet(distribution);
             final Path path = get(dir.getPath(),
-                                  "pgsql" + "-" + distribution.getVersion().asInDownloadPath(),
-                                  "bin");
-            if (filesSet.entries().stream().allMatch(entry -> exists(path))
-              ) {
+                    "pgsql" + "-" + distribution.getVersion().asInDownloadPath(), "pgsql");
+            if (exists(path)) {
                 final Builder extracted = builder(dir).baseDirIsGenerated(false);
-                iterateFiles(dir, TRUE, TRUE).forEachRemaining(file -> {
+                iterateFiles(path.toFile(), TRUE, TRUE).forEachRemaining(file -> {
                     FileType type = Library;
                     if (filesSet.entries().stream()
                             .anyMatch(entry -> entry.matchingPattern().matcher(file.getPath()).matches())) {
