@@ -6,7 +6,13 @@ velocity.log
 .project
 .settings
 .externalToolBuilders
-.idea
+
+.idea/*
+!.idea/vcs.xml
+!.idea/codeStyleSettings.xml
+!.idea/runConfigurations/
+!.idea/encodings.xml
+!.idea/inspectionProfiles/
 *.iml
 *.ipr
 *.iws
