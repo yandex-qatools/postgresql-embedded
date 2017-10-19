@@ -28,12 +28,12 @@ install:
   - cmd: SET RSAKEY=C:\Program Files\OpenSSH\etc\ssh_host_rsa_key
 build_script:
   - ssh.exe -i "%RSAKEY%" -oStrictHostKeyChecking=no postgres@localhost "cd ~/src && cmd /c .appveyor-run-mvn.bat clean install -B -DskipTests -Djna.nosys=true"
-  - set /p EXITCODE=<target/exit-code.txt
+  - set /p EXITCODE=<target\exit-code.txt
   - echo exitcode=%EXITCODE%
   - exit %EXITCODE%
 test_script:
   - ssh.exe -i "%RSAKEY%" -oStrictHostKeyChecking=no postgres@localhost "cd ~/src && cmd /c .appveyor-run-mvn.bat clean install -B -Djna.nosys=true"
-  - set /p EXITCODE=<target/exit-code.txt
+  - set /p EXITCODE=<target\exit-code.txt
   - echo exitcode=%EXITCODE%
   - exit %EXITCODE%
 cache:
