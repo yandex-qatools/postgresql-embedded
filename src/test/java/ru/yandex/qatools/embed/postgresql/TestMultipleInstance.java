@@ -17,13 +17,13 @@ public class TestMultipleInstance {
         final EmbeddedPostgres postgres0 = new EmbeddedPostgres();
         postgres0.start();
         assertThat(postgres0.getConnectionUrl().isPresent(), is(true));
-        checkVersion(postgres0.getConnectionUrl().get(), "PostgreSQL 9.6");
+        checkVersion(postgres0.getConnectionUrl().get(), "PostgreSQL 10.0");
         postgres0.stop();
 
-        final EmbeddedPostgres postgres1 = new EmbeddedPostgres(Version.Main.V9_5);
+        final EmbeddedPostgres postgres1 = new EmbeddedPostgres(Version.Main.V9_6);
         postgres1.start();
         assertThat(postgres1.getConnectionUrl().isPresent(), is(true));
-        checkVersion(postgres1.getConnectionUrl().get(), "PostgreSQL 9.5");
+        checkVersion(postgres1.getConnectionUrl().get(), "PostgreSQL 9.6");
         postgres1.stop();
     }
 
@@ -37,8 +37,8 @@ public class TestMultipleInstance {
         postgres1.start();
         assertThat(postgres1.getConnectionUrl().isPresent(), is(true));
 
-        checkVersion(postgres0.getConnectionUrl().get(), "PostgreSQL 9.6");
-        checkVersion(postgres1.getConnectionUrl().get(), "PostgreSQL 9.6");
+        checkVersion(postgres0.getConnectionUrl().get(), "PostgreSQL 10.0");
+        checkVersion(postgres1.getConnectionUrl().get(), "PostgreSQL 10.0");
 
         postgres0.stop();
         postgres1.stop();
@@ -46,16 +46,16 @@ public class TestMultipleInstance {
 
     @Test
     public void itShouldAllowToRunTwoInstancesAtSameTimeAndWithDifferentVersions() throws Exception {
-        final EmbeddedPostgres postgres0 = new EmbeddedPostgres(Version.Main.V9_5);
+        final EmbeddedPostgres postgres0 = new EmbeddedPostgres(Version.Main.V9_6);
         postgres0.start();
         assertThat(postgres0.getConnectionUrl().isPresent(), is(true));
 
-        final EmbeddedPostgres postgres1 = new EmbeddedPostgres(Version.Main.V9_6);
+        final EmbeddedPostgres postgres1 = new EmbeddedPostgres(Version.Main.V10);
         postgres1.start();
         assertThat(postgres1.getConnectionUrl().isPresent(), is(true));
 
-        checkVersion(postgres0.getConnectionUrl().get(), "PostgreSQL 9.5");
-        checkVersion(postgres1.getConnectionUrl().get(), "PostgreSQL 9.6");
+        checkVersion(postgres0.getConnectionUrl().get(), "PostgreSQL 9.6");
+        checkVersion(postgres1.getConnectionUrl().get(), "PostgreSQL 10.0");
 
         postgres0.stop();
         postgres1.stop();
