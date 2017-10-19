@@ -27,13 +27,13 @@ install:
   - cmd: SET PATH=C:\maven\apache-maven-3.2.5\bin;%JAVA_HOME%\bin;C:\Program Files\OpenSSH\bin;%PATH%
   - cmd: SET RSAKEY=C:\Program Files\OpenSSH\etc\ssh_host_rsa_key
 build_script:
-  - ssh.exe -i "%RSAKEY%" -oStrictHostKeyChecking=no postgres@localhost "cd ~/src && cmd /k .appveyor-run-mvn.sh clean install -B -DskipTests -Djna.nosys=true"
+  - ssh.exe -i "%RSAKEY%" -oStrictHostKeyChecking=no postgres@localhost "cd ~/src && bash ./.appveyor-run-mvn.sh clean install -B -DskipTests -Djna.nosys=true"
   - echo errorlevel=%ERRORLEVEL%
   - set /p EXITCODE=<C:\Users\postgres\src\target\exit-code.txt
   - echo exitcode=%EXITCODE%
   - exit %EXITCODE%
 test_script:
-  - ssh.exe -i "%RSAKEY%" -oStrictHostKeyChecking=no postgres@localhost "cd ~/src && cmd /k .appveyor-run-mvn.sh clean install -B -Djna.nosys=true"
+  - ssh.exe -i "%RSAKEY%" -oStrictHostKeyChecking=no postgres@localhost "cd ~/src && bash ./.appveyor-run-mvn.sh clean install -B -Djna.nosys=true"
   - echo errorlevel=%ERRORLEVEL%
   - set /p EXITCODE=<C:\Users\postgres\src\target\exit-code.txt
   - echo exitcode=%EXITCODE%
