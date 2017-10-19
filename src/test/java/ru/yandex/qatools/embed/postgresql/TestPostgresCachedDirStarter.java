@@ -3,6 +3,7 @@ package ru.yandex.qatools.embed.postgresql;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.io.directories.FixedPath;
 import de.flapdoodle.embed.process.store.PostgresArtifactStoreBuilder;
+import org.junit.Ignore;
 import ru.yandex.qatools.embed.postgresql.config.PostgresDownloadConfigBuilder;
 import ru.yandex.qatools.embed.postgresql.config.RuntimeConfigBuilder;
 
@@ -10,6 +11,7 @@ import java.io.File;
 
 import static org.apache.commons.io.FileUtils.getTempDirectory;
 
+@Ignore
 public class TestPostgresCachedDirStarter extends TestPostgresStarter {
 
     @Override

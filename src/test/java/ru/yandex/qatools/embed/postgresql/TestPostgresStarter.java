@@ -5,6 +5,7 @@ import de.flapdoodle.embed.process.io.progress.LoggingProgressListener;
 import de.flapdoodle.embed.process.store.NonCachedPostgresArtifactStoreBuilder;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import ru.yandex.qatools.embed.postgresql.config.AbstractPostgresConfig;
 import ru.yandex.qatools.embed.postgresql.config.PostgresDownloadConfigBuilder;
@@ -30,6 +31,7 @@ import static org.junit.Assert.assertThat;
 import static ru.yandex.qatools.embed.postgresql.distribution.Version.Main.PRODUCTION;
 import static ru.yandex.qatools.embed.postgresql.util.SocketUtil.findFreePort;
 
+@Ignore
 public class TestPostgresStarter {
 
     private static final Logger logger = Logger.getLogger(TestPostgresStarter.class.getName());
