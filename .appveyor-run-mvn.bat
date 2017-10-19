@@ -8,7 +8,8 @@ SET JAVA_OPTS=-XX:MaxPermSize=2g -Xmx4g
 SET PATH=C:\maven\apache-maven-3.2.5\bin;%JAVA_HOME%\bin;C:\Program Files\OpenSSH\bin;%PATH%
 mvn %*
 if %ERRORLEVEL% == 0 (
-   echo Build success
+   echo Build success (%ERRORLEVEL%)
 ) else (
+   echo Build failed (%ERRORLEVEL%)
    %ERRORLEVEL% > target/exit-code.txt
 )
