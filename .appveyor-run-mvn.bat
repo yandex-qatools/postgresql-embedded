@@ -7,3 +7,8 @@ SET MAVEN_OPTS=-XX:MaxPermSize=2g -Xmx4g
 SET JAVA_OPTS=-XX:MaxPermSize=2g -Xmx4g
 SET PATH=C:\maven\apache-maven-3.2.5\bin;%JAVA_HOME%\bin;C:\Program Files\OpenSSH\bin;%PATH%
 mvn %*
+if %ERRORLEVEL% == 0 (
+   echo Build success
+) else (
+   %ERRORLEVEL% > target/exit-code.txt
+)
