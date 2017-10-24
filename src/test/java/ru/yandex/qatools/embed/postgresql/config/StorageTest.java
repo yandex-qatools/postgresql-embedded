@@ -1,14 +1,12 @@
 package ru.yandex.qatools.embed.postgresql.config;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import ru.yandex.qatools.embed.postgresql.EmbeddedPostgres;
 
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
 
-@Ignore
 public class StorageTest {
 
 	@Test
