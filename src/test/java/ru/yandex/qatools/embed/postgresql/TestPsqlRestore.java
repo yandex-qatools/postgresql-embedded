@@ -1,6 +1,5 @@
 package ru.yandex.qatools.embed.postgresql;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -22,7 +21,6 @@ import static org.junit.Assert.assertThat;
  *
  * @author Arnaud Thimel (Code Lutin)
  */
-@Ignore
 public class TestPsqlRestore extends AbstractPsqlTest{
 
     @Test

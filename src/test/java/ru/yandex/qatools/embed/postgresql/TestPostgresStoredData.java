@@ -2,7 +2,6 @@ package ru.yandex.qatools.embed.postgresql;
 
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import ru.yandex.qatools.embed.postgresql.distribution.Version;
@@ -19,7 +18,6 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
-@Ignore
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TestPostgresStoredData {
 	static File baseDir = null;

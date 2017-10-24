@@ -1,6 +1,5 @@
 package ru.yandex.qatools.embed.postgresql;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,6 @@ import static org.junit.Assert.assertThat;
 /**
  * @author Ilya Sadykov
  */
-@Ignore
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath*:test-spring-context.xml"})
 public class TestPostgresWithinSpringContext {

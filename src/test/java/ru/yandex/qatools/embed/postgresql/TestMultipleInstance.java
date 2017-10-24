@@ -1,6 +1,5 @@
 package ru.yandex.qatools.embed.postgresql;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import ru.yandex.qatools.embed.postgresql.distribution.Version;
 
@@ -12,7 +11,6 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertThat;
 
-@Ignore
 public class TestMultipleInstance {
     @Test
     public void itShouldAllowToRunTwoInstancesWithDifferentVersions() throws Exception {

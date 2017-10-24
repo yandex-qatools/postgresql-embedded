@@ -1,6 +1,5 @@
 package ru.yandex.qatools.embed.postgresql;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -10,7 +9,6 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-@Ignore
 public class TestPsqlExport extends AbstractPsqlTest {
 
     @Test
