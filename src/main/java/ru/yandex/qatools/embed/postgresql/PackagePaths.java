@@ -140,6 +140,18 @@ public class PackagePaths implements IPackageResolver {
                 throw new IllegalArgumentException("Unknown BitSize " + distribution.getBitsize());
         }
 
-        return "postgresql-" + sversion + "-" + splatform + bitsize + "-binaries" + "." + sarchiveType;
+        String path = "postgresql-" + sversion + "-" + splatform + bitsize + "-binaries" + "." + sarchiveType;
+        switch (path) {
+            case       "postgresql-10.1-1-windows-x64-binaries.zip":
+                path = "postgresql-10.1-2-windows-x64-binaries.zip";
+                break;
+            case       "postgresql-9.6.6-1-windows-x64-binaries.zip":
+                path = "postgresql-9.6.6-2-windows-x64-binaries.zip";
+                break;
+            default:
+                // no path change needed
+                break;
+        }
+        return path;
     }
 }
