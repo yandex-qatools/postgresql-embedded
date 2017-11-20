@@ -47,8 +47,8 @@ public class PackagePaths implements IPackageResolver {
         try {
             return FileSet.builder()
                     .addEntry(FileType.Executable, tempDir.asFile().getPath(),
-                            "^.*pgsql\\\\bin\\\\"+ cmdPattern+ "$")
-                                    .addEntry(FileType.Executable, tempDir.asFile().getPath(),
+                            "^.*pgsql\\\\bin\\\\" + cmdPattern + "$")
+                    .addEntry(FileType.Executable, tempDir.asFile().getPath(),
                             "^.*pgsql/bin/" + cmdPattern + "$")
                     .build();
         } catch (Exception e) {
@@ -76,7 +76,7 @@ public class PackagePaths implements IPackageResolver {
 
     @Override
     public String getPath(Distribution distribution) {
-        String sversion = getVersionPart(distribution.getVersion());
+        String downloadVersion = getVersionPart(distribution.getVersion());
 
         ArchiveType archiveType = getArchiveType(distribution);
         String sarchiveType;
@@ -125,8 +125,20 @@ public class PackagePaths implements IPackageResolver {
             case B64:
                 switch (distribution.getPlatform()) {
                     case Linux:
+                        bitsize = "-x64";
+                        break;
                     case Windows:
                         bitsize = "-x64";
+                        // win x64 has different download paths
+                        // See https://github.com/yandex-qatools/postgresql-embedded/issues/109
+                        switch (downloadVersion) {
+                            case "10.1-1":
+                                downloadVersion = "10.1-2";
+                                break;
+                            case "9.6.6-1":
+                                downloadVersion = "9.6.6-2";
+                                break;
+                        }
                         break;
                     case OS_X:
                         break;
@@ -140,18 +152,6 @@ public class PackagePaths implements IPackageResolver {
                 throw new IllegalArgumentException("Unknown BitSize " + distribution.getBitsize());
         }
 
-        String path = "postgresql-" + sversion + "-" + splatform + bitsize + "-binaries" + "." + sarchiveType;
-        switch (path) {
-            case       "postgresql-10.1-1-windows-x64-binaries.zip":
-                path = "postgresql-10.1-2-windows-x64-binaries.zip";
-                break;
-            case       "postgresql-9.6.6-1-windows-x64-binaries.zip":
-                path = "postgresql-9.6.6-2-windows-x64-binaries.zip";
-                break;
-            default:
-                // no path change needed
-                break;
-        }
-        return path;
+        return "postgresql-" + downloadVersion + "-" + splatform + bitsize + "-binaries" + "." + sarchiveType;
     }
 }
