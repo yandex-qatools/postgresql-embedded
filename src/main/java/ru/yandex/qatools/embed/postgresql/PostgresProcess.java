@@ -118,6 +118,9 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
                     .prepare(postgresConfig);
             AbstractPGProcess proc = exec.start();
             logWatch.waitForResult(DEFAULT_CMD_TIMEOUT);
+            if (!logWatch.isInitWithSuccess() && !silent) {
+                LOGGER.warn("Possibly failed to run {}:\n{}", cmd.commandName(), logWatch.getOutput());
+            }
             proc.waitFor();
             return logWatch.getOutput();
         } catch (IOException | InterruptedException e) {
@@ -190,8 +193,7 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
             return;
         }
 
-        runCmd(config, runtimeConfig, InitDb,
-                "Success. You can now start the database server using", emptySet());
+        runCmd(config, runtimeConfig, InitDb, "Success", singleton("[initdb error]"));
     }
 
     @Override

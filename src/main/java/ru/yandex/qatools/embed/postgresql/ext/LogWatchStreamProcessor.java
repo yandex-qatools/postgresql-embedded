@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static java.util.Optional.ofNullable;
 
 /**
  * @author Ilya Sadykov
@@ -18,10 +18,11 @@ public class LogWatchStreamProcessor extends de.flapdoodle.embed.process.io.LogW
     private final String success;
     private final Set<String> failures;
     private volatile boolean found = false;
+    private volatile boolean initWithSuccess = false;
 
     public LogWatchStreamProcessor(String success, Set<String> failures, IStreamProcessor destination) {
         super(success, failures, destination);
-        this.success = success;
+        this.success = ofNullable(success).orElse("");
         this.failures = failures;
     }
 
@@ -29,7 +30,8 @@ public class LogWatchStreamProcessor extends de.flapdoodle.embed.process.io.LogW
     public void process(String block) {
         LOGGER.debug(block);
         output.append(block).append("\n");
-        if (containsSuccess(block) || containsFailure(block)) {
+        initWithSuccess = containsSuccess(block);
+        if (initWithSuccess || containsFailure(block)) {
             synchronized (mutex) {
                 found = true;
                 mutex.notifyAll();
@@ -52,6 +54,7 @@ public class LogWatchStreamProcessor extends de.flapdoodle.embed.process.io.LogW
         return false;
     }
 
+    @Override
     public void waitForResult(long timeout) {
         synchronized (mutex) {
             try {
@@ -59,14 +62,19 @@ public class LogWatchStreamProcessor extends de.flapdoodle.embed.process.io.LogW
                     mutex.wait(timeout);
                 }
             } catch (InterruptedException e) {
+                LOGGER.error("Failed to wait for the result: '{}' not found in: \n{}", success, output);
                 e.printStackTrace();
             }
         }
     }
 
     @Override
+    public boolean isInitWithSuccess() {
+        return initWithSuccess || getOutput().contains(success);
+    }
+
+    @Override
     public String getOutput() {
-        String res = output.toString();
-        return isEmpty(res) ? null : res;
+        return output.toString();
     }
 }
