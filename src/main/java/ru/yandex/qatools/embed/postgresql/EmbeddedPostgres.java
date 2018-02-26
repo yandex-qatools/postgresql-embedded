@@ -2,7 +2,9 @@ package ru.yandex.qatools.embed.postgresql;
 
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.distribution.IVersion;
+import de.flapdoodle.embed.process.distribution.Platform;
 import de.flapdoodle.embed.process.io.directories.FixedPath;
+import de.flapdoodle.embed.process.runtime.ICommandLinePostProcessor;
 import de.flapdoodle.embed.process.store.PostgresArtifactStoreBuilder;
 import ru.yandex.qatools.embed.postgresql.config.AbstractPostgresConfig;
 import ru.yandex.qatools.embed.postgresql.config.PostgresDownloadConfigBuilder;
@@ -11,6 +13,7 @@ import ru.yandex.qatools.embed.postgresql.config.RuntimeConfigBuilder;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -68,7 +71,36 @@ public class EmbeddedPostgres {
                         .download(new PostgresDownloadConfigBuilder()
                                 .defaultsForCommand(Command.Postgres)
                                 .build()))
+                .commandLinePostProcessor(privilegedWindowsRunasPostprocessor())
                 .build();
+    }
+
+    private static ICommandLinePostProcessor privilegedWindowsRunasPostprocessor() {
+        if (Platform.detect().equals(Platform.Windows)) {
+            try {
+                // Based on https://stackoverflow.com/a/11995662
+                final int adminCommandResult = Runtime.getRuntime().exec("net session").waitFor();
+                if (adminCommandResult == 0) {
+                    return runWithoutPrivileges();
+                }
+            } catch (Exception e) {
+                // Log maybe?
+            }
+        }
+        return doNothing();
+    }
+
+    private static ICommandLinePostProcessor runWithoutPrivileges() {
+        return (distribution, args) -> {
+            if (args.size() > 0 && args.get(0).endsWith("postgres.exe")) {
+                return Arrays.asList("runas", "/trustlevel:0x20000", String.format("\"%s\"", String.join(" ", args)));
+            }
+            return args;
+        };
+    }
+
+    private static ICommandLinePostProcessor doNothing() {
+        return (distribution, args) -> args;
     }
 
     /**
@@ -90,6 +122,7 @@ public class EmbeddedPostgres {
                                 .defaultsForCommand(cmd)
                                 .packageResolver(new PackagePaths(cmd, cachedDir))
                                 .build()))
+                .commandLinePostProcessor(privilegedWindowsRunasPostprocessor())
                 .build();
     }
 
