@@ -22,7 +22,6 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static ru.yandex.qatools.embed.postgresql.util.SocketUtil.findFreePort;
 
-@Ignore
 public class TestPostgresWithPgCtl {
 
     private PostgresProcess process;
