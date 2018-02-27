@@ -210,7 +210,8 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
                 break;
             case "pg_ctl": //NOSONAR
                 ret.addAll(asList(exe.executable().getAbsolutePath(),
-                        String.format("-o \"-p %s\" \"-h %s\"", config.net().port(), config.net().host()),
+                        "-o",
+                        String.format("-p %s -h %s", config.net().port(), config.net().host()),
                         "-D", config.storage().dbDir().getAbsolutePath(),
                         "-w",
                         "start"
