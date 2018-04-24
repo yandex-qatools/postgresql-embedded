@@ -26,7 +26,7 @@ import static ru.yandex.qatools.embed.postgresql.util.SocketUtil.findFreePort;
 /**
  * Helper class simplifying the start up configuration for embedded postgres
  */
-public class EmbeddedPostgres {
+public class EmbeddedPostgres implements AutoCloseable {
     public static final String DEFAULT_USER = "postgres";//NOSONAR
     public static final String DEFAULT_PASSWORD = "postgres";//NOSONAR
     public static final String DEFAULT_DB_NAME = "postgres";//NOSONAR
@@ -214,5 +214,10 @@ public class EmbeddedPostgres {
 
     public void stop() {
         getProcess().orElseThrow(() -> new IllegalStateException("Cannot stop not started instance!")).stop();
+    }
+
+    @Override
+    public void close() {
+        this.stop();
     }
 }

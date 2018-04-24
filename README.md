@@ -63,6 +63,10 @@ conn.close();
 postgres.stop();
 ```
 
+Note that EmbeddedPostgres implements [java.lang.AutoCloseable](https://docs.oracle.com/javase/7/docs/api/java/lang/AutoCloseable.html), 
+which means that you can use it with a [try-with-resources](https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html) 
+statement (in Java >= 7) to have it automatically stopped.
+
 ### How to avoid archive extraction on every run
 
 You can specify the cached artifact store to avoid archives downloading and extraction (in case if a directory remains on every run).
