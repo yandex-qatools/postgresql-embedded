@@ -13,15 +13,15 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static de.flapdoodle.embed.process.config.store.FileType.Executable;
 import static de.flapdoodle.embed.process.config.store.FileType.Library;
 import static de.flapdoodle.embed.process.extract.ImmutableExtractedFileSet.builder;
 import static java.nio.file.Files.exists;
+import static java.nio.file.Files.walk;
 import static java.nio.file.Paths.get;
-import static org.apache.commons.io.FileUtils.iterateFiles;
-import static org.apache.commons.io.filefilter.TrueFileFilter.TRUE;
 
 public class CachedPostgresArtifactStore extends PostgresArtifactStore {
     private static final Logger LOGGER = LoggerFactory.getLogger(CachedPostgresArtifactStore.class);
@@ -49,14 +49,16 @@ public class CachedPostgresArtifactStore extends PostgresArtifactStore {
                     "pgsql" + "-" + distribution.getVersion().asInDownloadPath(), "pgsql");
             if (exists(path)) {
                 final Builder extracted = builder(dir).baseDirIsGenerated(false);
-                iterateFiles(path.toFile(), TRUE, TRUE).forEachRemaining(file -> {
-                    FileType type = Library;
-                    if (filesSet.entries().stream()
-                            .anyMatch(entry -> entry.matchingPattern().matcher(file.getPath()).matches())) {
-                        type = Executable;
-                    }
-                    extracted.file(type, file);
-                });
+                walk(path)
+                        .filter(Files::isRegularFile)
+                        .forEach(file -> {
+                            FileType type = Library;
+                            if (filesSet.entries().stream()
+                                    .anyMatch(entry -> entry.matchingPattern().matcher(file.toString()).matches())) {
+                                type = Executable;
+                            }
+                            extracted.file(type, file.toFile());
+                        });
                 return extracted.build();
             } else {
                 return super.extractFileSet(distribution);

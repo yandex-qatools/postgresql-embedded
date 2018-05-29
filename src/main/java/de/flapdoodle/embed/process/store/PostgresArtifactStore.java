@@ -18,7 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.EnumSet;
 
-import static org.apache.commons.io.FileUtils.deleteQuietly;
+import static de.flapdoodle.embed.process.io.file.Files.forceDelete;
 
 /**
  * @author Ilya Sadykov
@@ -46,16 +46,16 @@ public class PostgresArtifactStore implements IMutableArtifactStore {
     public void removeFileSet(Distribution distribution, IExtractedFileSet all) {
         for (FileType type : EnumSet.complementOf(EnumSet.of(FileType.Executable))) {
             for (File file : all.files(type)) {
-                if (file.exists() && !deleteQuietly(file))
+                if (file.exists() && !forceDelete(file))
                     LOGGER.trace("Could not delete {} NOW: {}", type, file);
             }
         }
         File exe = all.executable();
-        if (exe.exists() && !deleteQuietly(exe)) {
+        if (exe.exists() && !forceDelete(exe)) {
             LOGGER.trace("Could not delete executable NOW: {}", exe);
         }
 
-        if (all.baseDirIsGenerated() && !deleteQuietly(all.baseDir())) {
+        if (all.baseDirIsGenerated() && !forceDelete(all.baseDir())) {
             LOGGER.trace("Could not delete generatedBaseDir: {}", all.baseDir());
         }
     }

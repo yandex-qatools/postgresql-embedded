@@ -36,11 +36,11 @@ import java.util.Set;
 import static de.flapdoodle.embed.process.io.file.Files.forceDelete;
 import static java.lang.System.currentTimeMillis;
 import static java.lang.Thread.sleep;
+import static java.nio.file.Files.lines;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
-import static org.apache.commons.io.FileUtils.readLines;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.slf4j.LoggerFactory.getLogger;
 import static ru.yandex.qatools.embed.postgresql.Command.CreateDb;
@@ -188,7 +188,7 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
         super.onBeforeProcess(runtimeConfig);
         PostgresConfig config = getConfig();
 
-        final File     dbDir   = config.storage().dbDir();
+        final File dbDir = config.storage().dbDir();
         if (dbDir.exists() && dbDir.listFiles() != null && dbDir.listFiles().length > 0) {
             return;
         }
@@ -241,10 +241,10 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
     @Override
     protected final void onAfterProcessStart(ProcessControl process,
                                              IRuntimeConfig runtimeConfig) throws IOException {
-        final Storage storage     = getConfig().storage();
-        final Path    pidFilePath = Paths.get(storage.dbDir().getAbsolutePath(), "postmaster.pid");
-        final File    pidFile     = new File(pidFilePath.toAbsolutePath().toString());
-        int           timeout     = TIMEOUT;
+        final Storage storage = getConfig().storage();
+        final Path pidFilePath = Paths.get(storage.dbDir().getAbsolutePath(), "postmaster.pid");
+        final File pidFile = new File(pidFilePath.toAbsolutePath().toString());
+        int timeout = TIMEOUT;
         while (!pidFile.exists() && ((timeout = timeout - 100) > 0)) {
             try {
                 sleep(100);
@@ -252,7 +252,8 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
         }
         int pid = -1;
         try {
-            pid = Integer.valueOf(readLines(pidFilePath.toFile()).get(0));
+            pid = lines(pidFilePath).findFirst().map(Integer::valueOf)
+                    .orElseThrow(() -> new IllegalStateException("Pid file is empty"));
         } catch (Exception e) {
             LOGGER.error("Failed to read PID file ({})", e.getMessage(), e);
         }
@@ -266,11 +267,11 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
         int trial = 0;
         do {
             String output = runCmd(getConfig(),
-                                   runtimeConfig,
-                                   CreateDb,
-                                   "",
-                                   new HashSet<>(singleton("database creation failed")),
-                                   storage.dbName());
+                    runtimeConfig,
+                    CreateDb,
+                    "",
+                    new HashSet<>(singleton("database creation failed")),
+                    storage.dbName());
             try {
                 if (isEmpty(output) || !output.contains("could not connect to database")) {
                     this.processReady = true;

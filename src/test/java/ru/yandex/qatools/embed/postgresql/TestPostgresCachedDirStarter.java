@@ -8,14 +8,12 @@ import ru.yandex.qatools.embed.postgresql.config.RuntimeConfigBuilder;
 
 import java.io.File;
 
-import static org.apache.commons.io.FileUtils.getTempDirectory;
-
 public class TestPostgresCachedDirStarter extends TestPostgresStarter {
 
     @Override
     protected IRuntimeConfig buildRuntimeConfig() {
         // turns off the default functionality of unzipping on every run.
-        final String tmpDir = new File(getTempDirectory(), "pgembed").getPath();
+        final String tmpDir = new File(System.getProperty("java.io.tmpdir"), "pgembed").getPath();
         final Command cmd = Command.Postgres;
         final FixedPath cachedDir = new FixedPath(tmpDir);
         return new RuntimeConfigBuilder()
