@@ -17,7 +17,7 @@ public class TestMultipleInstance {
         final EmbeddedPostgres postgres0 = new EmbeddedPostgres();
         postgres0.start();
         assertThat(postgres0.getConnectionUrl().isPresent(), is(true));
-        checkVersion(postgres0.getConnectionUrl().get(), "PostgreSQL 10.3");
+        checkVersion(postgres0.getConnectionUrl().get(), "PostgreSQL 10.4");
         postgres0.stop();
 
         final EmbeddedPostgres postgres1 = new EmbeddedPostgres(Version.Main.V9_6);
@@ -37,8 +37,8 @@ public class TestMultipleInstance {
         postgres1.start();
         assertThat(postgres1.getConnectionUrl().isPresent(), is(true));
 
-        checkVersion(postgres0.getConnectionUrl().get(), "PostgreSQL 10.3");
-        checkVersion(postgres1.getConnectionUrl().get(), "PostgreSQL 10.3");
+        checkVersion(postgres0.getConnectionUrl().get(), "PostgreSQL 10.4");
+        checkVersion(postgres1.getConnectionUrl().get(), "PostgreSQL 10.4");
 
         postgres0.stop();
         postgres1.stop();
@@ -55,7 +55,7 @@ public class TestMultipleInstance {
         assertThat(postgres1.getConnectionUrl().isPresent(), is(true));
 
         checkVersion(postgres0.getConnectionUrl().get(), "PostgreSQL 9.6");
-        checkVersion(postgres1.getConnectionUrl().get(), "PostgreSQL 10.3");
+        checkVersion(postgres1.getConnectionUrl().get(), "PostgreSQL 10.4");
 
         postgres0.stop();
         postgres1.stop();
