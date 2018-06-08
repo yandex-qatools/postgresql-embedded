@@ -6,7 +6,6 @@ import de.flapdoodle.embed.process.distribution.IVersion;
 import de.flapdoodle.embed.process.distribution.Platform;
 import de.flapdoodle.embed.process.store.IArtifactStore;
 import de.flapdoodle.embed.process.store.PostgresArtifactStoreBuilder;
-import org.junit.Ignore;
 import org.junit.Test;
 import ru.yandex.qatools.embed.postgresql.distribution.Version;
 
@@ -19,7 +18,6 @@ import static org.junit.Assert.assertThat;
 public class TestDownloads {
 
     @Test
-    @Ignore
     public void testDownloads() throws IOException {
         IArtifactStore artifactStore = new PostgresArtifactStoreBuilder().defaults(Command.Postgres).build();
 
