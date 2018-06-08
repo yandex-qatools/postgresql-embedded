@@ -19,14 +19,14 @@ Add the following dependency to your pom.xml:
 <dependency>
     <groupId>ru.yandex.qatools.embed</groupId>
     <artifactId>postgresql-embedded</artifactId>
-    <version>2.9</version>
+    <version>2.10</version>
 </dependency>
 ```
 ### Gradle
 
 Add a line to build.gradle:
 ```groovy
-compile 'ru.yandex.qatools.embed:postgresql-embedded:2.9'
+compile 'ru.yandex.qatools.embed:postgresql-embedded:2.10'
 ```
 
 ## Howto
@@ -119,7 +119,7 @@ postgres.start(cachedRuntimeConfig("C:\\Users\\vasya\\pgembedded-installation"))
   
 ### Supported Versions
 
-Versions: 10.3, 9.6.8, 9.5.12, any custom
+Versions: 10.4, 9.6.9, 9.5.13, any custom
 
 Platforms: Linux, Windows and MacOSX supported
 
