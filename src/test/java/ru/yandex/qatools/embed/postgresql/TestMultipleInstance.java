@@ -15,30 +15,26 @@ public class TestMultipleInstance {
     @Test
     public void itShouldAllowToRunTwoInstancesWithDifferentVersions() throws Exception {
         final EmbeddedPostgres postgres0 = new EmbeddedPostgres();
-        postgres0.start();
-        assertThat(postgres0.getConnectionUrl().isPresent(), is(true));
-        checkVersion(postgres0.getConnectionUrl().get(), "PostgreSQL 10.4");
+        start(postgres0);
+        checkVersion(postgres0, "PostgreSQL 10.");
         postgres0.stop();
 
         final EmbeddedPostgres postgres1 = new EmbeddedPostgres(Version.Main.V9_6);
-        postgres1.start();
-        assertThat(postgres1.getConnectionUrl().isPresent(), is(true));
-        checkVersion(postgres1.getConnectionUrl().get(), "PostgreSQL 9.6");
+        start(postgres1);
+        checkVersion(postgres1, "PostgreSQL 9.6");
         postgres1.stop();
     }
 
     @Test
     public void itShouldAllowToRunTwoInstancesAtSameTime() throws Exception {
         final EmbeddedPostgres postgres0 = new EmbeddedPostgres();
-        postgres0.start();
-        assertThat(postgres0.getConnectionUrl().isPresent(), is(true));
+        start(postgres0);
 
         final EmbeddedPostgres postgres1 = new EmbeddedPostgres();
-        postgres1.start();
-        assertThat(postgres1.getConnectionUrl().isPresent(), is(true));
+        start(postgres1);
 
-        checkVersion(postgres0.getConnectionUrl().get(), "PostgreSQL 10.4");
-        checkVersion(postgres1.getConnectionUrl().get(), "PostgreSQL 10.4");
+        checkVersion(postgres0, "PostgreSQL 10.");
+        checkVersion(postgres1, "PostgreSQL 10.");
 
         postgres0.stop();
         postgres1.stop();
@@ -47,21 +43,25 @@ public class TestMultipleInstance {
     @Test
     public void itShouldAllowToRunTwoInstancesAtSameTimeAndWithDifferentVersions() throws Exception {
         final EmbeddedPostgres postgres0 = new EmbeddedPostgres(Version.Main.V9_6);
-        postgres0.start();
-        assertThat(postgres0.getConnectionUrl().isPresent(), is(true));
+        start(postgres0);
 
         final EmbeddedPostgres postgres1 = new EmbeddedPostgres(Version.Main.V10);
-        postgres1.start();
-        assertThat(postgres1.getConnectionUrl().isPresent(), is(true));
+        start(postgres1);
 
-        checkVersion(postgres0.getConnectionUrl().get(), "PostgreSQL 9.6");
-        checkVersion(postgres1.getConnectionUrl().get(), "PostgreSQL 10.4");
+        checkVersion(postgres0, "PostgreSQL 9.6");
+        checkVersion(postgres1, "PostgreSQL 10.");
 
         postgres0.stop();
         postgres1.stop();
     }
 
-    private void checkVersion(String jdbcUrl, String expectedVersion) throws Exception {
+    private void start(EmbeddedPostgres postgres) throws Exception {
+        postgres.start();
+        assertThat(postgres.getConnectionUrl().isPresent(), is(true));
+    }
+
+    private void checkVersion(EmbeddedPostgres postgres, String expectedVersion) throws Exception {
+        String jdbcUrl = postgres.getConnectionUrl().get();
         try (final Connection conn = DriverManager.getConnection(jdbcUrl);
              final Statement statement = conn.createStatement()) {
             assertThat(statement.execute("SELECT version();"), is(true));
