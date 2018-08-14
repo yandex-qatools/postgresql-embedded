@@ -6,9 +6,9 @@ import de.flapdoodle.embed.process.distribution.IVersion;
  * PostgreSQL Version enum
  */
 public enum Version implements IVersion {
-    V10_4("10.4-1"),
-    V9_6_9("9.6.9-1"),
-    @Deprecated V9_5_13("9.5.13-1"),;
+    V10_5("10.5-1"),
+    V9_6_10("9.6.10-1"),
+    @Deprecated V9_5_14("9.5.14-1"),;
 
     private final String specificVersion;
 
@@ -27,10 +27,10 @@ public enum Version implements IVersion {
     }
 
     public enum Main implements IVersion {
-        V9_5(V9_5_13),
-        V9_6(V9_6_9),
-        V10(V10_4),
-        PRODUCTION(V10_4);
+        V9_5(V9_5_14),
+        V9_6(V9_6_10),
+        V10(V10_5),
+        PRODUCTION(V10_5);
 
         private final IVersion _latest;
 
