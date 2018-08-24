@@ -1,7 +1,5 @@
 package ru.yandex.qatools.embed.postgresql;
 
-import de.flapdoodle.embed.process.io.directories.FixedPath;
-import de.flapdoodle.embed.process.io.directories.IDirectory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,15 +58,13 @@ public class TestDeleteTemporaryDirectory {
         PowerMockito.when(PostgresExecutable.DirectoryCleaner.getInstance()).thenReturn(cleaner);
         PowerMockito.doNothing().when(cleaner).clean(Mockito.any(File.class));
 
-        // Create test directory path
-        IDirectory directory = new FixedPath(testDirectory.toFile().getAbsolutePath());
-
         // Run CleanerRunner
-        PostgresExecutable.CleanerRunner runner = new PostgresExecutable.CleanerRunner(directory);
+        PostgresExecutable.CleanerRunner runner =
+                new PostgresExecutable.CleanerRunner(testDirectory.toFile());
         runner.run();
 
         // Clean method was called by CleanerRunner
-        Mockito.verify(cleaner, Mockito.times(1)).clean(directory.asFile());
+        Mockito.verify(cleaner, Mockito.times(1)).clean(testDirectory.toFile());
     }
 
     @Test

@@ -3,12 +3,10 @@ package ru.yandex.qatools.embed.postgresql;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.extract.IExtractedFileSet;
-import de.flapdoodle.embed.process.io.directories.IDirectory;
 import de.flapdoodle.embed.process.runtime.ProcessControl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
-import ru.yandex.qatools.embed.postgresql.ext.SubdirTempDir;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,36 +19,35 @@ import java.util.stream.Stream;
  * postgres executable
  */
 public class PostgresExecutable extends AbstractPGExecutable<PostgresConfig, PostgresProcess> {
-    final IRuntimeConfig runtimeConfig;
-
     public PostgresExecutable(Distribution distribution,
                               PostgresConfig config, IRuntimeConfig runtimeConfig, IExtractedFileSet exe) {
         super(distribution, config, runtimeConfig, exe);
-        this.runtimeConfig = runtimeConfig;
-        addShutdownHook();
     }
 
     @Override
     protected PostgresProcess start(Distribution distribution, PostgresConfig config, IRuntimeConfig runtime)
             throws IOException {
+        addShutdownHook(runtime, distribution);
         return new PostgresProcess(distribution, config, runtime, this);
     }
 
-    private void addShutdownHook() {
-        ProcessControl.addShutdownHook(new CleanerRunner(SubdirTempDir.defaultInstance()));
+    private void addShutdownHook(IRuntimeConfig runtimeConfig, Distribution distribution) throws IOException {
+        ProcessControl.addShutdownHook(
+                new CleanerRunner(runtimeConfig.getArtifactStore().extractFileSet(distribution).baseDir())
+        );
     }
 
     static class CleanerRunner implements Runnable {
 
-        private IDirectory directory;
+        private File fileOrDirectory;
 
-        CleanerRunner(IDirectory directory) {
-            this.directory = directory;
+        CleanerRunner(File fileOrDirectory) {
+            this.fileOrDirectory = fileOrDirectory;
         }
 
         @Override
         public void run() {
-            DirectoryCleaner.getInstance().clean(this.directory.asFile());
+            DirectoryCleaner.getInstance().clean(this.fileOrDirectory);
         }
     }
 
