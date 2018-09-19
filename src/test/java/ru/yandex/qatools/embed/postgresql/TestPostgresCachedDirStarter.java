@@ -2,7 +2,7 @@ package ru.yandex.qatools.embed.postgresql;
 
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.io.directories.FixedPath;
-import de.flapdoodle.embed.process.store.PostgresArtifactStoreBuilder;
+import ru.yandex.qatools.embed.postgresql.store.PostgresArtifactStoreBuilder;
 import ru.yandex.qatools.embed.postgresql.config.PostgresDownloadConfigBuilder;
 import ru.yandex.qatools.embed.postgresql.config.RuntimeConfigBuilder;
 

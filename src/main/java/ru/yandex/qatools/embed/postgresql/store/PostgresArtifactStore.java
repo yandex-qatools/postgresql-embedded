@@ -1,4 +1,4 @@
-package de.flapdoodle.embed.process.store;
+package ru.yandex.qatools.embed.postgresql.store;
 
 import de.flapdoodle.embed.process.config.store.FileSet;
 import de.flapdoodle.embed.process.config.store.FileType;
@@ -11,6 +11,9 @@ import de.flapdoodle.embed.process.extract.IExtractedFileSet;
 import de.flapdoodle.embed.process.extract.IExtractor;
 import de.flapdoodle.embed.process.extract.ITempNaming;
 import de.flapdoodle.embed.process.io.directories.IDirectory;
+import de.flapdoodle.embed.process.store.ArtifactStore;
+import de.flapdoodle.embed.process.store.IDownloader;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,18 +27,17 @@ import static org.apache.commons.io.FileUtils.deleteQuietly;
  * @author Ilya Sadykov
  * Hacky ArtifactStore. Just to override the default FilesToExtract with PostgresFilesToExtract
  */
-public class PostgresArtifactStore implements IMutableArtifactStore {
+public class PostgresArtifactStore extends ArtifactStore implements IMutableArtifactStore {
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresArtifactStore.class);
     private IDownloadConfig downloadConfig;
     private IDirectory tempDirFactory;
     private ITempNaming executableNaming;
-    private IDownloader downloader;
 
     PostgresArtifactStore(IDownloadConfig downloadConfig, IDirectory tempDirFactory, ITempNaming executableNaming, IDownloader downloader) {
+        super(downloadConfig, tempDirFactory, executableNaming, downloader);
         this.downloadConfig = downloadConfig;
         this.tempDirFactory = tempDirFactory;
         this.executableNaming = executableNaming;
-        this.downloader = downloader;
     }
 
     public IDirectory getTempDir() {
@@ -58,14 +60,6 @@ public class PostgresArtifactStore implements IMutableArtifactStore {
         if (all.baseDirIsGenerated() && !deleteQuietly(all.baseDir())) {
             LOGGER.trace("Could not delete generatedBaseDir: {}", all.baseDir());
         }
-    }
-
-    @Override
-    public boolean checkDistribution(Distribution distribution) throws IOException {
-        if (!LocalArtifactStore.checkArtifact(downloadConfig, distribution)) {
-            return LocalArtifactStore.store(downloadConfig, distribution, downloader.download(downloadConfig, distribution));
-        }
-        return true;
     }
 
     public IDownloadConfig getDownloadConfig() {

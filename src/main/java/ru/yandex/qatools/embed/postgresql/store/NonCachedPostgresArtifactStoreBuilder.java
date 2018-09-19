@@ -1,4 +1,6 @@
-package de.flapdoodle.embed.process.store;
+package ru.yandex.qatools.embed.postgresql.store;
+
+import de.flapdoodle.embed.process.store.IArtifactStore;
 
 public class NonCachedPostgresArtifactStoreBuilder extends PostgresArtifactStoreBuilder {
 

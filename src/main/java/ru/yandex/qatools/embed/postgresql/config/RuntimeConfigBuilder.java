@@ -5,7 +5,7 @@ import de.flapdoodle.embed.process.config.store.IDownloadConfig;
 import de.flapdoodle.embed.process.io.progress.Slf4jProgressListener;
 import de.flapdoodle.embed.process.runtime.ICommandLinePostProcessor;
 import ru.yandex.qatools.embed.postgresql.Command;
-import de.flapdoodle.embed.process.store.PostgresArtifactStoreBuilder;
+import ru.yandex.qatools.embed.postgresql.store.PostgresArtifactStoreBuilder;
 
 /**
  * Configuration builder
