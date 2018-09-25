@@ -241,28 +241,9 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
     @Override
     protected final void onAfterProcessStart(ProcessControl process,
                                              IRuntimeConfig runtimeConfig) throws IOException {
-        final Storage storage     = getConfig().storage();
-        final Path    pidFilePath = Paths.get(storage.dbDir().getAbsolutePath(), "postmaster.pid");
-        final File    pidFile     = new File(pidFilePath.toAbsolutePath().toString());
-        int           timeout     = TIMEOUT;
-        while (!pidFile.exists() && ((timeout = timeout - 100) > 0)) {
-            try {
-                sleep(100);
-            } catch (InterruptedException ie) { /* safe to ignore */ }
-        }
-        int pid = -1;
-        try {
-            pid = Integer.valueOf(readLines(pidFilePath.toFile()).get(0));
-        } catch (Exception e) {
-            LOGGER.error("Failed to read PID file ({})", e.getMessage(), e);
-        }
-        if (pid != -1) {
-            setProcessId(pid);
-        } else {
-            // fallback, try to read pid file. will throw IOException if that fails
-            setProcessId(getPidFromFile(pidFile()));
-        }
-
+        final Storage storage     = getConfig().storage();      
+        setProcessId(process.getPid());
+        
         int trial = 0;
         do {
             String output = runCmd(getConfig(),
