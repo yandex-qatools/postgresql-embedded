@@ -36,6 +36,7 @@ public class EmbeddedPostgres implements AutoCloseable {
             "--locale=C",
             "--lc-collate=C",
             "--lc-ctype=C");
+    private static final List<String> DEFAULT_POSTGRES_PARAMS = asList();
     private final String dataDir;
     private final IVersion version;
     private PostgresProcess process;
@@ -161,6 +162,25 @@ public class EmbeddedPostgres implements AutoCloseable {
      */
     public String start(IRuntimeConfig runtimeConfig, String host, int port, String dbName, String user, String password,
                         List<String> additionalParams) throws IOException {
+        return start(runtimeConfig, host, port, dbName, user, password, additionalParams, DEFAULT_POSTGRES_PARAMS);
+    }
+    
+    /**
+     * Starts up the embedded postgres
+     *
+     * @param runtimeConfig    required runtime configuration
+     * @param host             host to bind to
+     * @param port             port to bind to
+     * @param dbName           name of the database to initialize
+     * @param user             username to connect
+     * @param password         password for the provided username
+     * @param additionalInitDbParams additional database init params (if required)
+     * @param additionalPostgresParams additional postgresql params (if required)
+     * @return connection url for the initialized postgres instance
+     * @throws IOException if an I/O error occurs during the process startup
+     */
+    public String start(IRuntimeConfig runtimeConfig, String host, int port, String dbName, String user, String password,
+                        List<String> additionalInitDbParams, List<String> additionalPostgresParams) throws IOException {
         final PostgresStarter<PostgresExecutable, PostgresProcess> runtime = PostgresStarter.getInstance(runtimeConfig);
         config = new PostgresConfig(version,
                 new AbstractPostgresConfig.Net(host, port),
@@ -168,7 +188,8 @@ public class EmbeddedPostgres implements AutoCloseable {
                 new AbstractPostgresConfig.Timeout(),
                 new AbstractPostgresConfig.Credentials(user, password)
         );
-        config.getAdditionalInitDbParams().addAll(additionalParams);
+        config.getAdditionalInitDbParams().addAll(additionalInitDbParams);
+        config.getAdditionalPostgresParams().addAll(additionalPostgresParams);
         PostgresExecutable exec = runtime.prepare(config);
         this.process = exec.start();
         return formatConnUrl(config);
