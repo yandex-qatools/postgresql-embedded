@@ -27,6 +27,7 @@ public abstract class AbstractPostgresConfig<C extends AbstractPostgresConfig> e
     protected final Credentials credentials;
     protected List<String> args = new ArrayList<>();
     protected List<String> additionalInitDbParams = new ArrayList<>();
+    protected List<String> additionalPostgresParams = new ArrayList<>();
 
     protected AbstractPostgresConfig(AbstractPostgresConfig config, Command postgres) {
         this(config.version, config.net(), config.storage, config.timeout(), config.credentials, new SupportConfig(postgres));
@@ -78,7 +79,6 @@ public abstract class AbstractPostgresConfig<C extends AbstractPostgresConfig> e
         return (C) this;
     }
 
-
     /**
      * You may add here additional arguments for the {@code initdb} executable.<br/>
      * <p>
@@ -98,6 +98,25 @@ public abstract class AbstractPostgresConfig<C extends AbstractPostgresConfig> e
      */
     public List<String> getAdditionalInitDbParams() {
         return additionalInitDbParams;
+    }
+
+    /**
+     * You may add here additional arguments for the {@code postgres} executable.<br/>
+     * <p>
+     * Example.<br>
+     * to use custom number of maximum connection.<br/>
+     * <pre>
+     * getAdditionalPostgresParams().addAll(
+     *      java.util.Arrays.asList(
+     *          "-c", "max_connections=11"
+     * )
+     * </pre>
+     * @return The list of additional parameters for the {@code postgres} executable.<br/>
+     * Not {@code null}.<br>
+     * @see <a href="https://www.postgresql.org/docs/9.6/static/config-setting.html#AEN32659">Parameter Interaction via the Shell</a>
+     */
+    public List<String> getAdditionalPostgresParams() {
+        return additionalPostgresParams;
     }
 
     public static class Storage {

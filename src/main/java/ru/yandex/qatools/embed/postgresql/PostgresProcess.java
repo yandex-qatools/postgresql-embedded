@@ -207,6 +207,7 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
                         "-h", config.net().host(),
                         "-D", config.storage().dbDir().getAbsolutePath()
                 ));
+                ret.addAll(config.getAdditionalPostgresParams());
                 break;
             case "pg_ctl": //NOSONAR
                 ret.addAll(asList(exe.executable().getAbsolutePath(),
