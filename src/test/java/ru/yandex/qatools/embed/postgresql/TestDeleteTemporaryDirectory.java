@@ -5,9 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,8 +20,7 @@ import java.util.stream.Stream;
 
 import static org.junit.Assert.assertFalse;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({PostgresExecutable.DirectoryCleaner.class})
+@RunWith(MockitoJUnitRunner.class)
 public class TestDeleteTemporaryDirectory {
 
     private static final Logger logger = LoggerFactory.getLogger(TestDeleteTemporaryDirectory.class);
@@ -54,13 +51,12 @@ public class TestDeleteTemporaryDirectory {
     public void callCleanMethodWhenCleanerRunnerIsRun() {
         // Mock DirectoryCleaner
         PostgresExecutable.DirectoryCleaner cleaner = Mockito.spy(PostgresExecutable.DirectoryCleaner.class);
-        PowerMockito.mockStatic(PostgresExecutable.DirectoryCleaner.class);
-        PowerMockito.when(PostgresExecutable.DirectoryCleaner.getInstance()).thenReturn(cleaner);
-        PowerMockito.doNothing().when(cleaner).clean(Mockito.any(File.class));
+        Mockito.doNothing().when(cleaner).clean(Mockito.any(File.class));
 
         // Run CleanerRunner
         PostgresExecutable.CleanerRunner runner =
-                new PostgresExecutable.CleanerRunner(testDirectory.toFile());
+                Mockito.spy(new PostgresExecutable.CleanerRunner(testDirectory.toFile()));
+        Mockito.doReturn(cleaner).when(runner).getCleaner();
         runner.run();
 
         // Clean method was called by CleanerRunner

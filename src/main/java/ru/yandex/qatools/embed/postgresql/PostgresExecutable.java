@@ -45,22 +45,22 @@ public class PostgresExecutable extends AbstractPGExecutable<PostgresConfig, Pos
             this.fileOrDirectory = fileOrDirectory;
         }
 
+        // TODO インスタンス生成するのはここで良いのか？もっと違うやり方があるのでは？
+        DirectoryCleaner getCleaner() {
+            return new DirectoryCleaner();
+        }
+
         @Override
         public void run() {
-            DirectoryCleaner.getInstance().clean(this.fileOrDirectory);
+            getCleaner().clean(this.fileOrDirectory);
         }
     }
 
     static class DirectoryCleaner {
         private static Logger logger = LoggerFactory.getLogger(DirectoryCleaner.class);
-        private static final DirectoryCleaner instance = new DirectoryCleaner();
-
-        static DirectoryCleaner getInstance() {
-            return instance;
-        }
 
         void clean(File cleanupTarget) {
-            synchronized (instance) {
+            synchronized (DirectoryCleaner.class) {
                 if (!cleanupTarget.exists()) {
                     return;
                 }
