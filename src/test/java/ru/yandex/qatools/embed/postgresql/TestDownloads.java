@@ -17,7 +17,7 @@ import static org.junit.Assert.assertThat;
 
 public class TestDownloads {
 
-    /** Version 11 binary downloads are av^ailable for OS X and Windows 64 bit only */
+    /** Version 11 binary downloads are available for OS X and Windows 64 bit only */
     private boolean supported(Distribution distribution) {
         if (! distribution.getVersion().asInDownloadPath().startsWith("11.")) {
             return true;
