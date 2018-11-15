@@ -17,6 +17,21 @@ import static org.junit.Assert.assertThat;
 
 public class TestDownloads {
 
+    /** Version 11 binary downloads are available for OS X and Windows 64 bit only */
+    private boolean supported(Distribution distribution) {
+        if (! distribution.getVersion().asInDownloadPath().startsWith("11.")) {
+            return true;
+        }
+        switch (distribution.getPlatform()) {
+        case OS_X:
+            return true;
+        case Windows:
+            return distribution.getBitsize() == BitSize.B64;
+        default:
+            return false;
+        }
+    }
+
     @Test
     public void testDownloads() throws IOException {
         IArtifactStore artifactStore = new PostgresArtifactStoreBuilder().defaults(Command.Postgres).build();
@@ -25,6 +40,9 @@ public class TestDownloads {
             for (BitSize b : BitSize.values()) {
                 for (IVersion version : Version.Main.values()) {
                     Distribution distribution = new Distribution(version, p, b);
+                    if (! supported(distribution)) {
+                        continue;
+                    }
                     assertThat("Distribution: " + distribution + " should be accessible", artifactStore.checkDistribution(distribution), is(true));
                 }
             }
