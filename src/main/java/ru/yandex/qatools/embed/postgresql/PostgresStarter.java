@@ -52,7 +52,7 @@ public class PostgresStarter<E extends AbstractPGExecutable<PostgresConfig, P>, 
 
     public static <E extends AbstractPGExecutable<PostgresConfig, P>, P extends AbstractPGProcess<E, P>>
     PostgresStarter<E, P> getCommand(Command command, IRuntimeConfig config) {
-        return new PostgresStarter<>(command.executableClass(), config);
+        return new PostgresStarter<E, P>(command.executableClass(), config);
     }
 
     public static <E extends AbstractPGExecutable<PostgresConfig, P>, P extends AbstractPGProcess<E, P>>
