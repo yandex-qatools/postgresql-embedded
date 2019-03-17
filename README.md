@@ -119,6 +119,6 @@ postgres.start(cachedRuntimeConfig("C:\\Users\\vasya\\pgembedded-installation"))
   
 ### Supported Versions
 
-* 11.1: on Mac OS X and Windows 64 bit
-* 10.6, 9.6.11, 9.5.15: on Linux, Windows, Mac OS X
+* 11.2: on Mac OS X and Windows 64 bit
+* 10.7, 9.6.12, 9.5.16: on Linux, Windows, Mac OS X
 * any custom version
