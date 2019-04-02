@@ -335,35 +335,80 @@ public class PostgresProcess extends AbstractPGProcess<PostgresExecutable, Postg
     }
 
     public void exportToFile(File file) {
-        runCmd(getConfig(), runtimeConfig, PgDump, "", new HashSet<>(singletonList("export from " + getConfig().storage().dbName() + " failed")),
-                "-U", getConfig().credentials().username(),
-                "-d", getConfig().storage().dbName(),
-                "-h", getConfig().net().host(),
-                "-p", String.valueOf(getConfig().net().port()),
-                "-f", file.getAbsolutePath()
-        );
+        exportToFileWithArgs(file);
+    }
+
+    /**
+     * Export database (scheme + data) to file, using the additional arguments in the {@code pg_dump} command-line
+     * @param file the resulting file
+     * @param cliArgs additional arguments for {@code pg_dump} (be sure to separate args from their values)
+     */
+    public void exportToFileWithArgs(File file, String... cliArgs) {
+        String[] args = {
+            "-U", getConfig().credentials().username(),
+            "-d", getConfig().storage().dbName(),
+            "-h", getConfig().net().host(),
+            "-p", String.valueOf(getConfig().net().port()),
+            "-f", file.getAbsolutePath()
+        };
+        if (cliArgs != null && cliArgs.length != 0) {
+            args = ArrayUtils.addAll(args, cliArgs);
+        }
+        runCmd(getConfig(), runtimeConfig, PgDump, "",
+            new HashSet<>(singletonList("export from " + getConfig().storage().dbName() + " failed")),
+            args);
     }
 
     public void exportSchemeToFile(File file) {
-        runCmd(getConfig(), runtimeConfig, PgDump, "", new HashSet<>(singletonList("export from " + getConfig().storage().dbName() + " failed")),
-                "-U", getConfig().credentials().username(),
-                "-d", getConfig().storage().dbName(),
-                "-h", getConfig().net().host(),
-                "-p", String.valueOf(getConfig().net().port()),
-                "-f", file.getAbsolutePath(),
-                "-s"
-        );
+        exportSchemeToFileWithArgs(file);
+    }
+
+    /**
+     * Export database scheme to file, using the additional arguments in the {@code pg_dump} command-line
+     * @param file the resulting file
+     * @param cliArgs additional arguments for {@code pg_dump} (be sure to separate args from their values)
+     */
+    public void exportSchemeToFileWithArgs(File file, String... cliArgs) {
+        String[] args = {
+            "-U", getConfig().credentials().username(),
+            "-d", getConfig().storage().dbName(),
+            "-h", getConfig().net().host(),
+            "-p", String.valueOf(getConfig().net().port()),
+            "-f", file.getAbsolutePath(),
+            "-s"
+        };
+        if (cliArgs != null && cliArgs.length != 0) {
+            args = ArrayUtils.addAll(args, cliArgs);
+        }
+        runCmd(getConfig(), runtimeConfig, PgDump, "",
+            new HashSet<>(singletonList("export from " + getConfig().storage().dbName() + " failed")),
+            args);
     }
 
     public void exportDataToFile(File file) {
-        runCmd(getConfig(), runtimeConfig, PgDump, "", new HashSet<>(singletonList("export from " + getConfig().storage().dbName() + " failed")),
-                "-U", getConfig().credentials().username(),
-                "-d", getConfig().storage().dbName(),
-                "-h", getConfig().net().host(),
-                "-p", String.valueOf(getConfig().net().port()),
-                "-f", file.getAbsolutePath(),
-                "-a"
-        );
+        exportDataToFileWithArgs(file);
+    }
+
+    /**
+     * Export database data to file, using the additional arguments in the {@code pg_dump} command-line
+     * @param file the resulting file
+     * @param cliArgs additional arguments for {@code pg_dump} (be sure to separate args from their values)
+     */
+    public void exportDataToFileWithArgs(File file, String... cliArgs) {
+        String[] args = {
+            "-U", getConfig().credentials().username(),
+            "-d", getConfig().storage().dbName(),
+            "-h", getConfig().net().host(),
+            "-p", String.valueOf(getConfig().net().port()),
+            "-f", file.getAbsolutePath(),
+            "-a"
+        };
+        if (cliArgs != null && cliArgs.length != 0) {
+            args = ArrayUtils.addAll(args, cliArgs);
+        }
+        runCmd(getConfig(), runtimeConfig, PgDump, "",
+            new HashSet<>(singletonList("export from " + getConfig().storage().dbName() + " failed")),
+            args);
     }
 
     public boolean isProcessReady() {
