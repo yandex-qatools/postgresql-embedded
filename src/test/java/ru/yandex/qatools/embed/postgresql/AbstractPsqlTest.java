@@ -1,5 +1,12 @@
 package ru.yandex.qatools.embed.postgresql;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import org.junit.After;
 import org.junit.Before;
 import ru.yandex.qatools.embed.postgresql.config.AbstractPostgresConfig;
@@ -49,6 +56,39 @@ public abstract class AbstractPsqlTest {
     public void tearDown() throws Exception {
         conn.close();
         process.stop();
+    }
+
+    /**
+     * Delete a given directory, recursively
+     * @param path the directory path to delete
+     * @throws IOException
+     */
+    static void deleteDir(final Path path) throws IOException {
+        Files.walkFileTree(
+            path,
+            new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes basicFileAttributes)
+                    throws IOException {
+                    Files.delete(file);
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException e) throws IOException {
+                    Files.delete(dir);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+    }
+
+    /**
+     * Delete a given directory, recursively
+     * @param file the directory to delete
+     * @throws IOException
+     */
+    static void deleteDir(final File file) throws IOException {
+        deleteDir(file.toPath());
     }
 
 }
