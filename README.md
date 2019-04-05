@@ -6,6 +6,12 @@
 Embedded PostgreSQL server provides a platform neutral way for running postgres binaries in unittests.
 This library is based on [Flapdoodle OSS's embed process](https://github.com/flapdoodle-oss/de.flapdoodle.embed.process). 
 
+## Note: this project is not being actively maintained anymore
+Sorry for any inconvinience, but this project needs active maintainers. If anyone is interested in becoming the maintainer - please let me ([@smecsia](https://github.com/smecsia)) know.
+
+## Officially recommended alternative
+Please be adviced that the main maintainer of this project has successfuly migrated to the use of [Test Containers project](https://www.testcontainers.org/modules/databases/postgres/). This is the best possible alternative nowadays.
+
 ## Motivation
 
 * It's much easier than installing specific version manually
