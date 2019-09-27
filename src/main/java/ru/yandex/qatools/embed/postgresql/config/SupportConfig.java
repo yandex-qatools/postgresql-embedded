@@ -24,4 +24,9 @@ public class SupportConfig implements ISupportConfig {
     public String messageOnException(Class<?> context, Exception exception) {
         return null;
     }
+
+    @Override
+    public long maxStopTimeoutMillis() {
+        return 100;
+    }
 }
