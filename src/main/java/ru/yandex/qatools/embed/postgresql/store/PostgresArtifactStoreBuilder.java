@@ -1,6 +1,8 @@
-package de.flapdoodle.embed.process.store;
+package ru.yandex.qatools.embed.postgresql.store;
 
 import de.flapdoodle.embed.process.extract.UUIDTempNaming;
+import de.flapdoodle.embed.process.store.Downloader;
+import de.flapdoodle.embed.process.store.IArtifactStore;
 import ru.yandex.qatools.embed.postgresql.Command;
 import ru.yandex.qatools.embed.postgresql.config.PostgresDownloadConfigBuilder;
 import ru.yandex.qatools.embed.postgresql.ext.SubdirTempDir;

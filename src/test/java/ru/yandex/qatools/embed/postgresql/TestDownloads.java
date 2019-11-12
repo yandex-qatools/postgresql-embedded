@@ -5,7 +5,7 @@ import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.distribution.IVersion;
 import de.flapdoodle.embed.process.distribution.Platform;
 import de.flapdoodle.embed.process.store.IArtifactStore;
-import de.flapdoodle.embed.process.store.PostgresArtifactStoreBuilder;
+import ru.yandex.qatools.embed.postgresql.store.PostgresArtifactStoreBuilder;
 import org.junit.Test;
 import ru.yandex.qatools.embed.postgresql.distribution.Version;
 

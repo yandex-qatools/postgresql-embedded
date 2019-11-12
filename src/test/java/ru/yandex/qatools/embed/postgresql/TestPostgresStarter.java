@@ -2,7 +2,7 @@ package ru.yandex.qatools.embed.postgresql;
 
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.io.progress.LoggingProgressListener;
-import de.flapdoodle.embed.process.store.NonCachedPostgresArtifactStoreBuilder;
+import ru.yandex.qatools.embed.postgresql.store.NonCachedPostgresArtifactStoreBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
